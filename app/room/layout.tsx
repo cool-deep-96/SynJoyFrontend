@@ -15,8 +15,8 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <div className={`${inter.className} h-screen`}>
-      <div className='text-center text-xl'>Room</div>
+    <div className={`${inter.className} h-screen text-white bg-black`}>
+      <div className='text-center text-xl '>Room</div>
       {children}
 
     </div>

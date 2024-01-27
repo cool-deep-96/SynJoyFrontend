@@ -44,7 +44,7 @@ const User = ({room_id}: userProps) => {
 
 
   return (
-    <div className='absolute right-0 w-72 bg-gray-200 p-2 rounded-xl h-96 overflow-hidden overflow-scroll overflow-x-hidden'>
+    <div className='absolute bg-gray-700 right-0 w-72 bg-gray-200 p-2 rounded-xl h-72 lg:h-96 overflow-hidden overflow-scroll overflow-x-hidden'>
         {
             data.map((user, index)=>{
                 return(

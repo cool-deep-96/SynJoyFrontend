@@ -2,6 +2,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useSocketUser } from '../SocketContextProvider/SocketContext';
 import ReactPlayer from 'react-player';
+import toast from 'react-hot-toast';
 
 interface Props {
     room_id: string,
@@ -30,6 +31,8 @@ const VideoPlayer = ({ room_id, userName }: Props) => {
                 setIsPlaying(true);
             });
 
+        } else{
+            toast.error('your are not connected')
         }
 
     }, [socket])
@@ -38,13 +41,16 @@ const VideoPlayer = ({ room_id, userName }: Props) => {
     const handleFileChange = (e: any) => {
         const files = e.target.files[0];
         setFiles(files);
-        setVideoUrl(URL.createObjectURL(files));
+        if(files){
+
+            setVideoUrl(URL.createObjectURL(files));
+        }
     }
 
 
 
     return (
-        <div className="w-full md:h-2/4 lg:h-full flex flex-col justify-center items-center bg-gray-900">
+        <div className="w-full md:h-full py-4 lg:h-full flex flex-col justify-center items-center bg-gray-900">
             <div>
 
                 <input type="file" onChange={(e) => handleFileChange(e)} />

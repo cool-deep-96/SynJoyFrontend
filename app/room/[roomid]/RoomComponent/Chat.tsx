@@ -62,7 +62,8 @@ const Chat = ({room_id}: Props) => {
           }
     }
 
-    const handleSendMessage=()=>{
+    const handleSendMessage=(e:any)=>{
+        e.preventDefault();
         if(socket){
             try{
 
@@ -84,16 +85,16 @@ const Chat = ({room_id}: Props) => {
         }
     }
     return (
-        <div className=" bg-gray-500  md:h-2/4 lg:h-full h-4/6 relative px-4 lg:w-6/12 w-full flex flex-col rounded-xl ">
-            <div className=' mb-14 h-full overflow-hidden overflow-scroll overflow-x-hidden'>
+        <div className=" bg-gray-500  md:h-2/4 md:h-full h-4/6 relative px-4 md:w-6/12 w-full flex flex-col rounded-xl ">
+            <div className='mb-14 h-full overflow-hidden overflow-scroll overflow-x-hidden'>
 
                 {
                     chat.map((message, index) => (
                         <div key={index} className={`flex ${message.sentBy === userName ? 'justify-end':""}`}>
 
                             <div  className="m-2 px-2 py-1  bg-gray-700 rounded-r-xl rounded-bl-xl max-w-fit w-2/4">
-                                <div className='text-sm '>~ {message.sentBy}</div>
-                                <div className='bg-gray-600 px-2 rounded-lg py-1'>{message.message}</div>
+                                <div className='text-xs lg:text-sm '>~ {message.sentBy}</div>
+                                <div className='bg-gray-600 px-2 lg:text-base md:text-sm rounded-lg py-1'>{message.message}</div>
                             </div>
                         </div>
 
@@ -102,12 +103,15 @@ const Chat = ({room_id}: Props) => {
             </div>
 
             <div className="bottom-0 absolute left-0 w-full">
-                <div className='flex justify-center'>
+                <div className='flex md:w-full justify-center'>
+                    <form onSubmit={(e)=>handleSendMessage(e)}>
+
                     <input onChange={(event) => setMessage(event.target.value)}
-                        className=' px-2 text-lg py-3 rounded-l-xl bg-gray-600'
+                        className=' px-2 md:w-56 lg:w-auto lg:text-lg py-3 rounded-l-xl bg-gray-600'
                         type="text" value={message} placeholder="Type Message..." />
-                    <button onClick={handleSendMessage}
-                        className="px-2 rounded-r-xl bg-gray-900 py-3 text-lg">Send</button>
+                    <button type='submit' 
+                        className="px-2 rounded-r-xl bg-gray-900 py-3 lg:text-lg">Send</button>
+                    </form>
                 </div>
             </div>
         </div>
