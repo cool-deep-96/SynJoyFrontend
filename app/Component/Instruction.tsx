@@ -14,7 +14,7 @@ const Instruction = ({imgSrc, order, heading, description, link}:InstructionProp
     return (
         <div className='flex flex-row gap-10  p-10'>
 
-            <div className={`${order? 'order-2': ''} flex justify-center  items-center border-2 rounded-3xl`}>
+            <div className={`${order? 'order-2': ''} flex justify-center  items-center  rounded-3xl`}>
                 <Image className="h-56 w-56" src={imgSrc || ''} alt="" width={1000} height={1000} />
             </div>
           
