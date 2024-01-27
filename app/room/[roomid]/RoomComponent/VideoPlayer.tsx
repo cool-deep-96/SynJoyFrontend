@@ -1,0 +1,73 @@
+"use client"
+import React, { useEffect, useRef, useState } from 'react'
+import { useSocketUser } from '../SocketContextProvider/SocketContext';
+import ReactPlayer from 'react-player';
+
+interface Props {
+    room_id: string,
+    userName: string | null
+}
+
+const VideoPlayer = ({ room_id, userName }: Props) => {
+    const socket = useSocketUser()?.socket;
+    const [file, setFiles] = useState<any>();
+    const [isPlaying, setIsPlaying] = useState<boolean>(false);
+    const [videoUrl, setVideoUrl] = useState<string | undefined>();
+    const videoRef = useRef<ReactPlayer | null>(null);
+    const [url, setUrl] = useState<string>('');
+
+    useEffect(() => {
+        if (socket) {
+            socket.on('pause', () => {
+                setIsPlaying(false);
+            });
+
+            socket.on('play', (second) => {
+
+                if (videoRef.current) {
+                    videoRef.current.seekTo(second, 'seconds');
+                }
+                setIsPlaying(true);
+            });
+
+        }
+
+    }, [socket])
+
+
+    const handleFileChange = (e: any) => {
+        const files = e.target.files[0];
+        setFiles(files);
+        setVideoUrl(URL.createObjectURL(files));
+    }
+
+
+
+    return (
+        <div className="w-full md:h-2/4 lg:h-full flex flex-col justify-center items-center bg-gray-900">
+            <div>
+
+                <input type="file" onChange={(e) => handleFileChange(e)} />
+                
+                        
+            </div>
+
+
+            {videoUrl && <ReactPlayer
+
+                ref={videoRef}
+                url={videoUrl}
+                controls={true}
+                onPause={() => { socket && socket.emit('pause', userName) }}
+                onPlay={() => { socket && socket.emit('play', videoRef!.current!.getCurrentTime(), userName) }}
+                playing={isPlaying}
+                width='100%'
+                height='100%'
+
+            />}
+
+        </div>
+    )
+}
+
+export default VideoPlayer;
