@@ -15,12 +15,14 @@ const VideoPlayer = ({ room_id, userName }: Props) => {
     const [isPlaying, setIsPlaying] = useState<boolean>(false);
     const [videoUrl, setVideoUrl] = useState<string | undefined>();
     const videoRef = useRef<ReactPlayer | null>(null);
-    const [url, setUrl] = useState<string>('');
+    const [willEmit, setWillEmit] = useState<boolean>(true);
 
     useEffect(() => {
         if (socket) {
             socket.on('pause', () => {
+                setWillEmit(false);
                 setIsPlaying(false);
+                setWillEmit(true);
             });
 
             socket.on('play', (second) => {
@@ -28,7 +30,9 @@ const VideoPlayer = ({ room_id, userName }: Props) => {
                 if (videoRef.current) {
                     videoRef.current.seekTo(second, 'seconds');
                 }
+                setWillEmit(false);
                 setIsPlaying(true);
+                setWillEmit(true);
             });
 
         } else{
@@ -65,7 +69,7 @@ const VideoPlayer = ({ room_id, userName }: Props) => {
                 url={videoUrl}
                 controls={true}
                 onPause={() => { socket && socket.emit('pause', userName) }}
-                onPlay={() => { socket && (isPlaying ? socket?.emit('pause', userName) : socket.emit('play', videoRef!.current!.getCurrentTime(), userName)) }}
+                onPlay={() => { socket &&  willEmit && socket.emit('play', videoRef!.current!.getCurrentTime(), userName) }}
                 playing={isPlaying}
                 width='100%'
                 height='100%'
