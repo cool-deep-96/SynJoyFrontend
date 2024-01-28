@@ -42,7 +42,7 @@ export default function Home() {
 
 
   return (
-    <div className="bg-white text-black min-h-screen bg-[url('/images/decore.webp')] bg-no-repeat bg-contain bg-right-top bg-[length:50vw_70vh]">
+    <div className="bg-white text-black min-h-screen bg-[url('/images/decore.jpg')] bg-no-repeat bg-contain bg-right-top bg-[length:50vw_70vh]">
       <div className="bg-white inline-block py-8 ml-48">
         <Image className="h-8" src='/images/Logo.png' alt="" width={100} height={100} />
       </div>
