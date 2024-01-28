@@ -53,6 +53,7 @@ export default function Page() {
         room_id: result,
         userName: userName
       }
+      console.log(url, data);
       const response = await apicall(
         method,
         url,
