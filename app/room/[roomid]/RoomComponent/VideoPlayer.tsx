@@ -70,7 +70,7 @@ const VideoPlayer = ({ room_id, userName }: Props) => {
 
                 ref={videoRef}
                 url={videoUrl}
-                controls={false}
+                controls={true}
                 onPause={() => { socket && socket.emit('pause', videoRef!.current!.getCurrentTime(), userName ) }}
                 onPlay={() => { socket &&  socket.emit('play', videoRef!.current!.getCurrentTime(), userName) }}
                 playing={isPlaying}
