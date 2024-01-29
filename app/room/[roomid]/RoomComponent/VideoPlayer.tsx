@@ -19,10 +19,13 @@ const VideoPlayer = ({ room_id, userName }: Props) => {
 
     useEffect(() => {
         if (socket) {
-            socket.on('pause', () => {
-                setWillEmit(false);
+            socket.on('pause', (second) => {
+                if (videoRef.current) {
+                    videoRef.current.seekTo(second, 'seconds');
+                }
+                
                 setIsPlaying(false);
-                setWillEmit(true);
+                
             });
 
             socket.on('play', (second) => {
@@ -30,9 +33,9 @@ const VideoPlayer = ({ room_id, userName }: Props) => {
                 if (videoRef.current) {
                     videoRef.current.seekTo(second, 'seconds');
                 }
-                setWillEmit(false);
+                
                 setIsPlaying(true);
-                setWillEmit(true);
+                
             });
 
         } else{
@@ -67,14 +70,17 @@ const VideoPlayer = ({ room_id, userName }: Props) => {
 
                 ref={videoRef}
                 url={videoUrl}
-                controls={true}
-                onPause={() => { socket && socket.emit('pause', userName) }}
-                onPlay={() => { socket &&  willEmit && socket.emit('play', videoRef!.current!.getCurrentTime(), userName) }}
+                controls={false}
+                onPause={() => { socket && socket.emit('pause', videoRef!.current!.getCurrentTime(), userName ) }}
+                onPlay={() => { socket &&  socket.emit('play', videoRef!.current!.getCurrentTime(), userName) }}
                 playing={isPlaying}
                 width='100%'
                 height='100%'
+                onSeek={()=> {setIsPlaying(false)}}
 
-            />}
+            />
+
+            }
 
         </div>
     )
