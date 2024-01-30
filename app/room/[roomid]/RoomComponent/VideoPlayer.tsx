@@ -133,7 +133,7 @@ const VideoPlayer = ({ room_id, userName }: Props) => {
                 <input type="file" onChange={(e) => handleFileChange(e)} />
             </div>
 
-                <div className={`relative flex h-full w-full mx-4 ${videoUrl !== ''? '':'hidden'}`} onMouseLeave={() => hideControls()} onMouseOver={() => setIsControls(true)} onTouchStart={()=> setIsControls(true)}
+                <div className={`relative flex justify-center h-full w-full mx-4 ${videoUrl !== ''? '':'hidden'}`} onMouseLeave={() => hideControls()} onMouseOver={() => setIsControls(true)} onTouchStart={()=> setIsControls(true)}
       onTouchEnd={()=>hideControls()}>
                     <video className='' ref={videoRef} onClick={handleVideo} >
                         <source src={videoUrl} />

@@ -68,7 +68,7 @@ export const SocketProvider: React.FC<SocketContextProps> = ({ children , room_i
 
   useEffect(() => {
     if (typeof window !== 'undefined' && userName == null) {
-      redirect('/room');
+      //  redirect('/room');
     }
   }, [userName]);
   
