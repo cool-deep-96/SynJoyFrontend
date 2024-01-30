@@ -26,7 +26,6 @@ const Chat = ({room_id}: Props) => {
         if(typeof window !== 'undefined' &&  userName != null){
             chatSync(room_id, userName);
         }else if(typeof window !== 'undefined' &&  userName == null){
-            console.log('hhh');
             redirect('/room');
         }
     },[userName])
@@ -79,7 +78,6 @@ const Chat = ({room_id}: Props) => {
     
                 setMessage("");
             } catch(error:any) {
-                console.log('hhh');
                 toast.error(error.message);
             }
         }

@@ -65,11 +65,6 @@ const VideoPlayer = ({ room_id, userName }: Props) => {
         setDuration(videoRef.current?.duration || 0);
     })
 
-  
-
-    
-
-
     const handleFileChange = (e: any) => {
         setIsPlaying(false)
         const files = e.target.files[0];
@@ -108,6 +103,7 @@ const VideoPlayer = ({ room_id, userName }: Props) => {
             socket && socket.emit('play', videoRef!.current!.currentTime, userName)
           sliding();
         } else {
+           
             socket && socket.emit('pause', videoRef!.current!.currentTime, userName)
           cancelAnimationFrame(animationId); 
         }
@@ -124,10 +120,10 @@ const VideoPlayer = ({ room_id, userName }: Props) => {
         const currentTimeInSeconds = parseInt(progressBarRef.current?.value || "0", 10);
         videoRef.current!.currentTime = currentTimeInSeconds;
         progressBarRef.current?.style.setProperty('--selected-region', `${(parseInt(progressBarRef.current?.value|| "0", 10)/ duration )* 100}%`)
-        setIsPlaying(false);
         setCurrentTimePlayed(parseInt(progressBarRef.current?.value|| "0", 10));
+        videoRef?.current?.pause();
+        setIsPlaying(false);
         socket && socket.emit('pause', currentTimeInSeconds, userName);
-        
       }
 
 
@@ -136,9 +132,9 @@ const VideoPlayer = ({ room_id, userName }: Props) => {
             <div>
                 <input type="file" onChange={(e) => handleFileChange(e)} />
             </div>
-            {videoUrl !== '' &&
 
-                <div className="relative flex h-full w-full mx-4" onMouseLeave={() => hideControls()} onMouseOver={() => setIsControls(true)}>
+                <div className={`relative flex h-full w-full mx-4 ${videoUrl !== ''? '':'hidden'}`} onMouseLeave={() => hideControls()} onMouseOver={() => setIsControls(true)} onTouchStart={()=> setIsControls(true)}
+      onTouchEnd={()=>hideControls()}>
                     <video className='' ref={videoRef} onClick={handleVideo} >
                         <source src={videoUrl} />
                     </video>
@@ -185,7 +181,7 @@ const VideoPlayer = ({ room_id, userName }: Props) => {
                         </div>
                     </div>
                 </div>
-            }
+            
         </div>
     )
 }
