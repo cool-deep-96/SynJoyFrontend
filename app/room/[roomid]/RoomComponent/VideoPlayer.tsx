@@ -25,38 +25,36 @@ const VideoPlayer = ({ room_id, userName }: Props) => {
     const [isPlaybackOption, setIsPlaybackOptions] = useState<boolean>(false);
 
     const [duration, setDuration] = useState<number>(0);
+    const [currentTimePlayed, setCurrentTimePlayed] = useState<number>(0);
     const progressBarRef = useRef<HTMLInputElement | null>(null);
-    const [currentPlayedTime, setCurrentPlayedTime] = useState<number>(0);
     
     let animationId:number;
 
     useEffect(() => {
         if (socket) {
-            socket.on('pause', (second) => {
+            socket.on('pause', (second, userName) => {
                 if (videoRef.current) {
                     progressBarRef.current!.value = `${second}`
+                    setCurrentTimePlayed(second)
+                    videoRef.current!.currentTime = second;
                     videoRef?.current?.pause();
-                    setCurrentPlayedTime(second);
                 }
                 setIsPlaying(false);
             });
 
-            socket.on('play', (second) => {
+            socket.on('play', (second, userName) => {
 
                 if (videoRef.current) {
                     progressBarRef.current!.value = `${second}`
-                    setCurrentPlayedTime(second);
+                    setCurrentTimePlayed(second);
+                    videoRef.current!.currentTime = second;
                     videoRef?.current?.play();
-                    
-                    
                 }
-
                 setIsPlaying(true);
-
             });
 
         } else {
-            toast.error('your are not connected')
+            
         }
 
     }, [socket]);
@@ -72,11 +70,15 @@ const VideoPlayer = ({ room_id, userName }: Props) => {
 
 
     const handleFileChange = (e: any) => {
+        setIsPlaying(false)
         const files = e.target.files[0];
+
+      
         setFiles(files);
         if (files) {
             setVideoUrl(URL.createObjectURL(files));
         }
+        videoRef.current?.load();
     }
 
 
@@ -112,21 +114,18 @@ const VideoPlayer = ({ room_id, userName }: Props) => {
 
     const sliding = ()=>{
         progressBarRef.current!.value =`${videoRef.current?.currentTime}` ||"0";
-        setCurrentPlayedTime(parseInt(progressBarRef.current?.value|| "0", 10));
+        setCurrentTimePlayed(parseInt(progressBarRef.current?.value|| "0", 10));
         progressBarRef.current?.style.setProperty('--selected-region', `${(parseInt(progressBarRef.current?.value || "0", 10)/ duration )* 100}%`)
         animationId = requestAnimationFrame(sliding);
     }
 
     const changeRange = ()=>{
         const currentTimeInSeconds = parseInt(progressBarRef.current?.value || "0", 10);
-        if (!isNaN(currentTimeInSeconds)) {
-          videoRef.current!.currentTime = currentTimeInSeconds;
-        }
-        videoRef?.current?.pause();
+        videoRef.current!.currentTime = currentTimeInSeconds;
         progressBarRef.current?.style.setProperty('--selected-region', `${(parseInt(progressBarRef.current?.value|| "0", 10)/ duration )* 100}%`)
-        setCurrentPlayedTime(parseInt(progressBarRef.current?.value|| "0", 10));
-        
-        socket && socket.emit('pause', videoRef!.current!.currentTime, userName);
+        setIsPlaying(false);
+        setCurrentTimePlayed(parseInt(progressBarRef.current?.value|| "0", 10));
+        socket && socket.emit('pause', currentTimeInSeconds, userName);
         
       }
 
@@ -154,10 +153,10 @@ const VideoPlayer = ({ room_id, userName }: Props) => {
                         <div className="flex flex-row justify-between md:my-2">
 
                             <div className="mx-1 flex flex-row gap-2">
-                                <button className="" onClick={()=>setIsMuted(!isMuted)}>{isMuted?<MuteButton />:<Unmute />}</button>
+                                <button className="" onClick={()=>{setIsMuted(!isMuted); videoRef.current!.muted= !isMuted}}>{isMuted? <MuteButton />:<Unmute />}</button>
                                 
                                 <div className="">
-                                    {`${formatTime(videoRef.current?.currentTime || 0)}/${formatTime(duration || 0)}`}
+                                    {`${formatTime(currentTimePlayed || 0)}/${formatTime(duration || 0)}`}
                                 </div>
                             </div>
 

@@ -27,7 +27,7 @@ const Chat = ({room_id}: Props) => {
             chatSync(room_id, userName);
         }else if(typeof window !== 'undefined' &&  userName == null){
             console.log('hhh');
-            redirect('/room');
+            // redirect('/room');
         }
     },[userName])
 
