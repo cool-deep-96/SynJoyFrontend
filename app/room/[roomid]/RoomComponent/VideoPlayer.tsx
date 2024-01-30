@@ -38,6 +38,7 @@ const VideoPlayer = ({ room_id, userName }: Props) => {
                     setCurrentTimePlayed(second)
                     videoRef.current!.currentTime = second;
                     videoRef?.current?.pause();
+                    setIsControls(true);
                 }
                 setIsPlaying(false);
             });
