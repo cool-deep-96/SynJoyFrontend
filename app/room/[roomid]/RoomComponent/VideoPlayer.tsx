@@ -109,6 +109,12 @@ const VideoPlayer = ({ room_id, userName }: Props) => {
         }
       }
 
+    const handleSkip = (number: number)=>{
+        socket && socket.emit('play', videoRef!.current!.currentTime + number , userName)
+    }
+
+    
+
     const sliding = ()=>{
         progressBarRef.current!.value =`${videoRef.current?.currentTime}` ||"0";
         setCurrentTimePlayed(parseInt(progressBarRef.current?.value|| "0", 10));
@@ -158,9 +164,9 @@ const VideoPlayer = ({ room_id, userName }: Props) => {
                             </div>
 
                             <div className="flex flex-row gap-3 md:gap-5 lg:gap-10">
-                                <button className="skip-backward"><Rewind /></button>
+                                <button className="skip-backward" onClick={()=>handleSkip(-10)}><Rewind /></button>
                                 <button className="play-pause" onClick={handleVideo}>{isPlaying?<PauseButton />:<PlayButton />}</button>
-                                <button className="skip-forward"><Forward /></button>
+                                <button className="skip-forward" onClick={()=>handleSkip(10)}><Forward /></button>
                             </div>
 
 

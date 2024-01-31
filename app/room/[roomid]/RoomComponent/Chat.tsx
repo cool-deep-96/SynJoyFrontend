@@ -63,19 +63,18 @@ const Chat = ({room_id}: Props) => {
 
     const handleSendMessage=(e:any)=>{
         e.preventDefault();
+        if(message == ''){
+            return;
+        }
         if(socket){
             try{
-
                 socket.emit("roomMessage", [message, room_id, userName], (error: string|null, acknowledgement?: string|null)=>{
                     if(error){ 
                       toast.error(error);
-                      
-    
                     }else {
                       toast.success(acknowledgement || '');
                     }
-                  });
-    
+                });
                 setMessage("");
             } catch(error:any) {
                 toast.error(error.message);
@@ -89,7 +88,6 @@ const Chat = ({room_id}: Props) => {
                 {
                     chat.map((message, index) => (
                         <div key={index} className={`flex ${message.sentBy === userName ? 'justify-end':""}`}>
-
                             <div  className="m-2 px-2 py-1  bg-gray-700 rounded-r-xl rounded-bl-xl max-w-fit w-2/4">
                                 <div className='text-xs lg:text-sm '>~ {message.sentBy}</div>
                                 <div className='bg-gray-600 px-2 lg:text-base md:text-sm rounded-lg py-1'>{message.message}</div>
@@ -103,7 +101,6 @@ const Chat = ({room_id}: Props) => {
             <div className="bottom-0 absolute left-0 w-full">
                 <div className='flex md:w-full justify-center'>
                     <form onSubmit={(e)=>handleSendMessage(e)}>
-
                     <input onChange={(event) => setMessage(event.target.value)}
                         className=' px-2 md:w-56 lg:w-auto lg:text-lg py-3 rounded-l-xl bg-gray-600'
                         type="text" value={message} placeholder="Type Message..." />
