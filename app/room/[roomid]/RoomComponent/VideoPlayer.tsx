@@ -110,7 +110,7 @@ const VideoPlayer = ({ room_id, userName }: Props) => {
       }
 
     const handleSkip = (number: number)=>{
-        socket && socket.emit('play', videoRef!.current!.currentTime + number , userName)
+        socket && socket.emit('pause', videoRef!.current!.currentTime + number , userName)
     }
 
     
