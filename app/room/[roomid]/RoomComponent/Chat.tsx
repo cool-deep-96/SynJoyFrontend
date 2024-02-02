@@ -28,7 +28,7 @@ const Chat = ({room_id}: Props) => {
         }else if(typeof window !== 'undefined' &&  userName == null){
             redirect('/room');
         }
-    },[userName])
+    },[userName, room_id])
 
 
     useEffect(()=>{

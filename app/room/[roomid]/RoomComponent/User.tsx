@@ -19,7 +19,7 @@ const User = ({room_id}: userProps) => {
         if(typeof window !== 'undefined' &&  userName != null){
             userSync(room_id, userName);
         }
-    },[userName])
+    },[userName, room_id])
 
     const userSync = async (room_id:string, userName:string)=>{
         try{
