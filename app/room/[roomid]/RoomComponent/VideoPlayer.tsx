@@ -5,10 +5,13 @@ import toast from 'react-hot-toast';
 import { Forward, FullScreen, MuteButton, PauseButton, PictureInPictureAlt, PlayButton, Rewind, SlowMotionVideo, Unmute } from '@/app/Component/AllIcons';
 
 
+
 interface Props {
     room_id: string,
     userName: string | null
 }
+
+var timer:any;
 
 const VideoPlayer = ({ room_id, userName }: Props) => {
     const socket = useSocketUser()?.socket;
@@ -90,7 +93,7 @@ const VideoPlayer = ({ room_id, userName }: Props) => {
 
     const hideControls = () => {
         if (!isPlaying) return;
-        setTimeout(() => {
+        timer = setTimeout(() => {
             setIsControls(false);
         }, 1000);
     }
@@ -100,9 +103,13 @@ const VideoPlayer = ({ room_id, userName }: Props) => {
 
     const handleVideo = () =>{
         if(!isPlaying){
+            // videoRef.current?.play();
+            // setIsPlaying(true);
             socket && socket.emit('play', videoRef!.current!.currentTime, userName)
           sliding();
         } else {
+            // videoRef.current?.pause();
+            // setIsPlaying(false);
            
             socket && socket.emit('pause', videoRef!.current!.currentTime, userName)
           cancelAnimationFrame(animationId); 
@@ -110,7 +117,7 @@ const VideoPlayer = ({ room_id, userName }: Props) => {
       }
 
     const handleSkip = (number: number)=>{
-        socket && socket.emit('pause', videoRef!.current!.currentTime + number , userName)
+        socket && socket.emit('play', videoRef!.current!.currentTime + number , userName)
     }
 
     
@@ -139,50 +146,53 @@ const VideoPlayer = ({ room_id, userName }: Props) => {
                 <input type="file" onChange={(e) => handleFileChange(e)} />
             </div>
 
-                <div className={`relative flex justify-center h-full w-full mx-4 ${videoUrl !== ''? '':'hidden'}`} onMouseLeave={() => hideControls()} onMouseOver={() => setIsControls(true)} onTouchStart={()=> setIsControls(true)}
-      onTouchEnd={()=>hideControls()}>
-                    <video className='' ref={videoRef} onClick={handleVideo} >
+                <div className={`relative flex justify-center h-full w-full mx-4 ${videoUrl !== ''? '':'hidden'}`} >
+                    <video className='' ref={videoRef} onClick={handleVideo} onMouseMove={() =>{setIsControls(true);clearTimeout(timer); hideControls()}} onTouchStart={()=> setIsControls(true)}
+      onTouchEnd={()=>hideControls()}> 
                         <source src={videoUrl} />
                     </video>
 
-                    <div className={`wrapper ${isControls ? '' : 'hidden'} absolute bottom-0 flex flex-col w-full h-20 md:h-28 lg:h-36`}>
+                    <div className={`${isControls ? '' : 'hidden'} absolute bottom-0  w-full h-20 md:h-28 lg:h-36 z-10 bg-black bg-opacity-40`} onMouseOver={()=>{clearTimeout(timer)}}>
 
-                        <div className="my-4" >
-                            <div className="progress-area flex flex-col">
-                                <input type="range" className='w-full' defaultValue="0" ref={progressBarRef} max={`${duration}`} onChange={changeRange} />
-                            </div>
-                        </div>
+                        <div className={` w-full flex flex-col `}  >
 
-                        <div className="flex flex-row justify-between md:my-2">
-
-                            <div className="mx-1 flex flex-row gap-2">
-                                <button className="" onClick={()=>{setIsMuted(!isMuted); videoRef.current!.muted= !isMuted}}>{isMuted? <MuteButton />:<Unmute />}</button>
-                                
-                                <div className="">
-                                    {`${formatTime(currentTimePlayed || 0)}/${formatTime(duration || 0)}`}
+                            <div className="mb-4" >
+                                <div className="progress-area flex flex-col">
+                                    <input type="range" className='w-full' defaultValue="0" ref={progressBarRef} max={`${duration}`} onChange={changeRange} />
                                 </div>
                             </div>
 
-                            <div className="flex flex-row gap-3 md:gap-5 lg:gap-10">
-                                <button className="skip-backward" onClick={()=>handleSkip(-10)}><Rewind /></button>
-                                <button className="play-pause" onClick={handleVideo}>{isPlaying?<PauseButton />:<PlayButton />}</button>
-                                <button className="skip-forward" onClick={()=>handleSkip(10)}><Forward /></button>
-                            </div>
+                            <div className="flex flex-row justify-between md:my-2">
 
-
-                            <div className="mr-1 flex flex-row gap-3 md:gap-5">
-                                <div className="flex relative">
-                                    <div className= {`${isPlaybackOption? '':'hidden'} absolute bottom-0 mb-10 -left-8 bg-white rounded-lg text-black px-4`} >
-                                        <div data-speed="2" className={`my-2`}>2x</div>
-                                        <div data-speed="1.5" className={`my-2`}>1.5x</div>
-                                        <div data-speed="1" className={`my-2`} >Normal</div>
-                                        <div data-speed="0.75" className={`my-2`}>0.75x</div>
-                                        <div data-speed="0.5" className={`my-2`}>0.5x</div>
+                                <div className="mx-1 flex flex-row gap-2">
+                                    <button className="" onClick={()=>{setIsMuted(!isMuted); videoRef.current!.muted= !isMuted}}>{isMuted? <MuteButton />:<Unmute />}</button>
+                                    
+                                    <div className="">
+                                        {`${formatTime(currentTimePlayed || 0)}/${formatTime(duration || 0)}`}
                                     </div>
-                                    <button className="" onClick={()=>setIsPlaybackOptions(!isPlaybackOption)}><SlowMotionVideo /></button>
                                 </div>
-                                <button className="pic-in-pic"><PictureInPictureAlt /></button>
-                                <button className="fullscreen"><FullScreen /></button>
+
+                                <div className="flex flex-row gap-3 md:gap-5 lg:gap-10">
+                                    <button className="skip-backward" onClick={()=>handleSkip(-10)}><Rewind /></button>
+                                    <button className="play-pause" onClick={handleVideo}>{isPlaying?<PauseButton />:<PlayButton />}</button>
+                                    <button className="skip-forward" onClick={()=>handleSkip(10)}><Forward /></button>
+                                </div>
+
+
+                                <div className="mr-1 flex flex-row gap-3 md:gap-5">
+                                    <div className="flex relative">
+                                        <div className= {`${isPlaybackOption? '':'hidden'} absolute bottom-0 mb-10 -left-8 bg-white rounded-lg text-black px-4`} >
+                                            <div data-speed="2" className={`my-2`}>2x</div>
+                                            <div data-speed="1.5" className={`my-2`}>1.5x</div>
+                                            <div data-speed="1" className={`my-2`} >Normal</div>
+                                            <div data-speed="0.75" className={`my-2`}>0.75x</div>
+                                            <div data-speed="0.5" className={`my-2`}>0.5x</div>
+                                        </div>
+                                        <button className="" onClick={()=>setIsPlaybackOptions(!isPlaybackOption)}><SlowMotionVideo /></button>
+                                    </div>
+                                    <button className="pic-in-pic"><PictureInPictureAlt /></button>
+                                    <button className="fullscreen"><FullScreen /></button>
+                                </div>
                             </div>
                         </div>
                     </div>
