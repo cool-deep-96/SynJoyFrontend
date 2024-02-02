@@ -2,7 +2,7 @@
 import React, { useEffect, useRef, useState } from 'react'
 import { useSocketUser } from '../SocketContextProvider/SocketContext';
 import toast from 'react-hot-toast';
-import { Forward, FullScreen, MuteButton, PauseButton, PictureInPictureAlt, PlayButton, Rewind, SlowMotionVideo, Unmute } from '@/app/Component/AllIcons';
+import { ExitFullscreen, Forward, FullScreen, MuteButton, PauseButton, PictureInPictureAlt, PlayButton, Rewind, SlowMotionVideo, Unmute } from '@/app/Component/AllIcons';
 
 
 
@@ -30,6 +30,8 @@ const VideoPlayer = ({ room_id, userName }: Props) => {
     const [duration, setDuration] = useState<number>(0);
     const [currentTimePlayed, setCurrentTimePlayed] = useState<number>(0);
     const progressBarRef = useRef<HTMLInputElement | null>(null);
+    const containerRef = useRef<HTMLDivElement|null>(null)
+    const [isFullScreen, setIsFullScreen] = useState<Boolean>(false);
     
     let animationId:number;
 
@@ -146,9 +148,9 @@ const VideoPlayer = ({ room_id, userName }: Props) => {
                 <input type="file" onChange={(e) => handleFileChange(e)} />
             </div>
 
-                <div className={`relative flex justify-center h-full w-full mx-4 ${videoUrl !== ''? '':'hidden'}`} >
-                    <video className='' ref={videoRef} onClick={handleVideo} onMouseMove={() =>{setIsControls(true);clearTimeout(timer); hideControls()}} onTouchStart={()=> setIsControls(true)}
-      onTouchEnd={()=>hideControls()}> 
+                <div className={`relative flex justify-center h-full w-full mx-4 ${videoUrl !== ''? '':'hidden'}`} ref={containerRef}>
+                    <video className='' ref={videoRef}  onClick={handleVideo} onMouseMove={() =>{setIsControls(true);clearTimeout(timer); hideControls()}} onTouchStart={()=> setIsControls(true)}
+      onTouchEnd={()=>hideControls()} > 
                         <source src={videoUrl} />
                     </video>
 
@@ -191,7 +193,7 @@ const VideoPlayer = ({ room_id, userName }: Props) => {
                                         <button className="" onClick={()=>setIsPlaybackOptions(!isPlaybackOption)}><SlowMotionVideo /></button>
                                     </div>
                                     <button className="pic-in-pic"><PictureInPictureAlt /></button>
-                                    <button className="fullscreen"><FullScreen /></button>
+                                    <button className="" onClick={()=>{if(isFullScreen){document.exitFullscreen();setIsFullScreen(false)}else{containerRef.current?.requestFullscreen();setIsFullScreen(true)}}}>{isFullScreen? <ExitFullscreen/>:<FullScreen />}</button>
                                 </div>
                             </div>
                         </div>
