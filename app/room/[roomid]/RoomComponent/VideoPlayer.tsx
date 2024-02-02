@@ -152,7 +152,7 @@ const VideoPlayer = ({ room_id, userName }: Props) => {
                         <source src={videoUrl} />
                     </video>
 
-                    <div className={`${isControls ? '' : 'hidden'} absolute bottom-0  w-full h-20 md:h-28 lg:h-36 z-10 bg-black bg-opacity-40`} onMouseOver={()=>{clearTimeout(timer)}}>
+                    <div className={`${isControls ? '' : 'hidden'} absolute bottom-0  w-full h-16 md:h-24 lg:h-32 z-10 bg-black bg-opacity-40`} onMouseOver={()=>{clearTimeout(timer)}}>
 
                         <div className={` w-full flex flex-col `}  >
 
