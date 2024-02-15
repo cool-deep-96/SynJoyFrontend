@@ -26,7 +26,7 @@ const Chat = ({room_id}: Props) => {
         if(typeof window !== 'undefined' &&  userName != null){
             chatSync(room_id, userName);
         }else if(typeof window !== 'undefined' &&  userName == null){
-            redirect('/room');
+            // redirect('/room');
         }
     },[userName, room_id])
 
@@ -82,8 +82,8 @@ const Chat = ({room_id}: Props) => {
         }
     }
     return (
-        <div className=" bg-gray-500  md:h-2/4 md:h-full h-4/6 relative px-4 md:w-6/12 w-full flex flex-col rounded-xl ">
-            <div className='mb-14 h-full overflow-hidden overflow-scroll overflow-x-hidden'>
+        <div className=" bg-gray-500  md:h-full h-4/6 relative px-4 md:w-6/12 w-full flex flex-col rounded-xl ">
+            <div className='mb-14 h-full  overflow-scroll overflow-x-hidden'>
 
                 {
                     chat.map((message, index) => (
