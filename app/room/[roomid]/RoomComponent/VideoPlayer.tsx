@@ -198,16 +198,16 @@ const VideoPlayer = ({ room_id, userName }: Props) => {
         <>
             <div className="w-full md:h-full py-4 lg:h-full flex flex-col justify-center items-center bg-gray-900">
                 <div className='flex gap-5 justify-center items-center'>
-                    <label htmlFor='ChooseFile' className='hover:cursor-pointer bg-white text-black px-2 py-1 rounded-lg border-b-4 border-r-4  border-yellow-300 hover:border-0'>Choose Video File</label>
+                    <label htmlFor='ChooseFile' className='hover:cursor-pointer bg-white text-sm text-black px-2 py-1 rounded-lg border-b-4 border-r-4  border-yellow-300 hover:border-0'>Choose Video File</label>
                     <input id='ChooseFile' type="file" className='hidden'
                         onChange={(e) => handleFileChange(e)} />
                     <form onSubmit={handleYoutUbeUrl}>
-                        <input className='text-lg px-2 py-1 rounded-md bg-red-100 border-red-600 border-2 text-black '
+                        <input className='text-md px-2 py-1 rounded-l-md bg-red-100 w-40 border-red-600 border text-black '
                             placeholder='Paste YouTube Url'
                             type='text'
                             value={youtubeUrl || ''}
                             onChange={(e) => setYoutubeUrl(e.target.value)} />
-                        <input type='submit' className='hidden' />
+                        <input type='submit' className='bg-red-600 text-md px-2 py-1 rounded-r-md' value="GO"/>
                     </form>
                 </div>
                 <div className={`relative  flex justify-center h-full w-full mx-4 ${videoUrl || videoId ? '' : 'hidden'}`} ref={containerRef}>
