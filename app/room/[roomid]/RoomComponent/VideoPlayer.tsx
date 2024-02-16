@@ -20,9 +20,9 @@ const VideoPlayer = ({ room_id, userName }: Props) => {
     const [isPlaying, setIsPlaying] = useState<boolean>(false);
     const [isMuted, setIsMuted] = useState<boolean>(false);
 
-    const [videoUrl, setVideoUrl] = useState<string>('');
+    const [videoUrl, setVideoUrl] = useState<string|null>('');
     const [youtubeUrl, setYoutubeUrl] = useState<string | null>('');
-    const [videoId, setVideoId] = useState<string>('')
+    var [videoId, setVideoId] = useState<string|null>('')
 
     const videoRef = useRef<HTMLVideoElement | null>(null);
 
@@ -38,24 +38,16 @@ const VideoPlayer = ({ room_id, userName }: Props) => {
 
     let animationId: number;
 
-
-    const videoType = () => {
-        if (videoId) {
-            return false;
-        } else {
-            return true;
-        }
-    }
-
     useEffect(() => {
         if (socket) {
             socket.on('pause', async (second, userName) => {
                 if (videoRef.current || videoId) {
                     progressBarRef.current!.value = `${second}`
                     setCurrentTimePlayed(second)
-                    videoType()? videoRef.current!.currentTime = second : await player?.seekTo(second);;
-                    videoType() ? videoRef.current?.pause() : player?.pauseVideo();
+                    videoId?  await player?.seekTo(second) : videoRef.current!.currentTime = second ;
+                    videoId?  player?.pauseVideo():videoRef.current?.pause();
                     setIsControls(true);
+                    cancelAnimationFrame(animationId);
                 }
                 setIsPlaying(false);
             });
@@ -64,36 +56,33 @@ const VideoPlayer = ({ room_id, userName }: Props) => {
                 if (videoRef.current || videoId) {
                     progressBarRef.current!.value = `${second}`;
                     setCurrentTimePlayed(second);
-                    videoType()? videoRef.current!.currentTime = second : await player?.seekTo(second);
-                    videoType() ? videoRef.current?.play() : player?.playVideo();
+                    videoId?  await player?.seekTo(second) : videoRef.current!.currentTime = second ;
+                    videoId? player?.playVideo() : videoRef.current?.play();
+                    sliding();
                 }
                 setIsPlaying(true);
             });
 
             socket.on('videoId',(videoId, userName)=>{
                 setVideoUrl('');
-                setVideoId(videoId);
                 setYoutubeUrl('');
+                setVideoId(videoId);
             });
 
         } else {
 
         }
 
-    }, [socket]);
+    }, [socket, videoId]);
 
     const youtubeMetaData = async () => {
         const time = await player?.getDuration();
         setDuration(time);
-        let iframe: HTMLIFrameElement|null = document.querySelector('iframe');
-        iframe?.addEventListener('click',()=>{
-            console.log('clicked iframe')
-        })
-
     }
 
     useEffect(() => {
-        if (videoId !== '') {
+        if (videoId) {
+            player?.destroy();
             player = YouTubePlayer('youtubePlayer', {
                 videoId: `${videoId}`,
                 playerVars: {
@@ -111,7 +100,7 @@ const VideoPlayer = ({ room_id, userName }: Props) => {
         videoRef.current?.addEventListener("loadedmetadata", () => {
             setDuration(videoRef.current?.duration || 0);
         });
-    }, [videoUrl])
+    }, [videoId])
 
 
     const handleFileChange = (e: any) => {
@@ -119,7 +108,7 @@ const VideoPlayer = ({ room_id, userName }: Props) => {
         const files = e.target.files[0];
         setFiles(files);
         if (files) {
-            setVideoId('');
+            setVideoId(null);
             setVideoUrl(URL.createObjectURL(files));
         }
 
@@ -146,28 +135,26 @@ const VideoPlayer = ({ room_id, userName }: Props) => {
 
     const handleVideo = async () => {
         if (!isPlaying) {
-            const time = videoType() ? videoRef.current?.currentTime : await player?.getCurrentTime()
+            const time = videoId?  await player?.getCurrentTime():videoRef.current?.currentTime
             socket && socket.emit('play', time, userName)
-            sliding();
+            
         } else {
-            // videoType() ? videoRef.current?.pause() : player?.pauseVideo();
-            // setIsPlaying(false);
-            const time = videoType() ? videoRef.current?.currentTime : await player?.getCurrentTime()
-            socket && socket.emit('pause', videoRef!.current!.currentTime, userName)
-            cancelAnimationFrame(animationId);
+            const time = videoId ? await player?.getCurrentTime() : videoRef.current?.currentTime
+            socket && socket.emit('pause', time, userName)
+            
         }
     }
 
     const handleSkip =async (number: number) => {
-        const time = videoType() ? videoRef.current?.currentTime : await player?.getCurrentTime()
+        const time = videoId? await player?.getCurrentTime() :videoRef.current?.currentTime 
         socket && socket.emit(isPlaying ? 'play' : 'pause', time + number, userName)
     }
 
 
 
     const sliding = async () => {
-        const time = await player?.getCurrentTime()
-        progressBarRef.current!.value = `${videoId === '' ? videoRef.current?.currentTime : time}` || "0";
+        const time = videoId? await player?.getCurrentTime() :videoRef.current?.currentTime 
+        progressBarRef.current!.value = `${time}` || "0";
         setCurrentTimePlayed(parseInt(progressBarRef.current?.value || "0", 10));
         progressBarRef.current?.style.setProperty('--selected-region', `${(parseInt(progressBarRef.current?.value || "0", 10) / duration) * 100}%`)
         animationId = requestAnimationFrame(sliding);
@@ -175,9 +162,10 @@ const VideoPlayer = ({ room_id, userName }: Props) => {
 
     const changeRange = async () => {
         const currentTimeInSeconds = parseInt(progressBarRef.current?.value || "0", 10);
-        videoType()? videoRef.current!.currentTime = currentTimeInSeconds : await player?.seekTo(currentTimeInSeconds);
+        videoId? await player?.seekTo(currentTimeInSeconds):videoRef.current!.currentTime = currentTimeInSeconds 
         progressBarRef.current?.style.setProperty('--selected-region', `${(parseInt(progressBarRef.current?.value || "0", 10) / duration) * 100}%`)
         setCurrentTimePlayed(parseInt(progressBarRef.current?.value || "0", 10));
+        
         socket && socket.emit('pause', currentTimeInSeconds, userName);
     }
 
@@ -222,9 +210,9 @@ const VideoPlayer = ({ room_id, userName }: Props) => {
                         <input type='submit' className='hidden' />
                     </form>
                 </div>
-                <div className={`relative  flex justify-center h-full w-full mx-4 ${videoUrl !== '' || videoId !== '' ? '' : 'hidden'}`} ref={containerRef}>
+                <div className={`relative  flex justify-center h-full w-full mx-4 ${videoUrl || videoId ? '' : 'hidden'}`} ref={containerRef}>
                     <div 
-                        className={`${videoId !== '' ? '' : 'hidden'} h-[30vh]  w-full  md:h-full bg-red-100 bg-opacity-20`}
+                        className={`${videoId? '' : 'hidden'} h-[30vh]  w-full  md:h-full bg-red-100 bg-opacity-20`}
                         onClick={handleVideo}
                         onMouseMove={() => { setIsControls(true); clearTimeout(timer); hideControls() }}
                         onTouchStart={() => setIsControls(true)}
@@ -253,7 +241,7 @@ const VideoPlayer = ({ room_id, userName }: Props) => {
                             <div className="flex flex-row justify-between md:my-2">
                                 <div className="mx-1 flex flex-row gap-2">
                                     <button className=""
-                                        onClick={() => { setIsMuted(!isMuted); videoType()? videoRef.current!.muted = !isMuted : (isMuted? player?.unMute() :player?.mute())}}>{isMuted ? <MuteButton /> : <Unmute />}</button>
+                                        onClick={() => { setIsMuted(!isMuted); videoId? (isMuted? player?.unMute() :player?.mute()): videoRef.current!.muted = !isMuted}}>{isMuted ? <MuteButton /> : <Unmute />}</button>
                                     <div className="">
                                         {`${formatTime(currentTimePlayed || 0)}/${formatTime(duration || 0)}`}
                                     </div>

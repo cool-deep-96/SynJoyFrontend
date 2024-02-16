@@ -33,7 +33,7 @@ export default function Room({ params }: Params) {
                         {userSwitch && <User room_id={room_id} />}
                     </div>
                 </div>
-                <div className="w-full  h-full flex flex-col md:flex-row justify-between h-full lg:justify-start">
+                <div className="w-full flex flex-col md:flex-row justify-between h-full lg:justify-start">
                     <VideoPlayer room_id={room_id} userName={userName} />
                     <Chat room_id={room_id} />
                 </div>

@@ -22,7 +22,6 @@ export default function Page() {
   useEffect(()=>{
     if(socketInstance){
         socketInstance.on('responsejoin', (userName, accepted)=>{
-          console.log(accepted);
           if(accepted){
             handleJoinRoom(userName);
           }else{
@@ -53,7 +52,6 @@ export default function Page() {
         room_id: result,
         userName: userName
       }
-      console.log(url, data);
       const response = await apicall(
         method,
         url,
