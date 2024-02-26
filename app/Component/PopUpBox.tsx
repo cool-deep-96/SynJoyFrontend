@@ -7,11 +7,12 @@ interface Props{
     decline?: ()=> void
     userRequesting?:string|null,
     handle: (userName:string)=> void,
-    handleClose?: ()=>void
+    handleClose?: ()=>void,
+    loading?: boolean
 }
 
 
-const PopUpBox = ({Heading, action, handle, handleClose, decline, userRequesting}: Props) => {
+const PopUpBox = ({Heading, action, handle, handleClose, decline, userRequesting, loading}: Props) => {
     const [userName, setUserName] = useState<string>('');
 
   return (
@@ -29,7 +30,7 @@ const PopUpBox = ({Heading, action, handle, handleClose, decline, userRequesting
                 <div className="pt-5 justify-between flex">
                     {decline && <button onClick={decline}
                      className=' bg-gray-900 px-3 text-sm py-2 rounded-lg'>decline</button>}
-                    <button className=' bg-gray-900 px-3 text-sm py-2 rounded-lg' onClick={()=>handle(userName)}>{action}</button>
+                    <button className=' bg-gray-900 px-3 text-sm py-2 rounded-lg disabled:bg-slate-600' disabled={loading} onClick={()=>handle(userName)}>{action}</button>
                 </div>
             </div>
         </div>

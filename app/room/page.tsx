@@ -17,6 +17,7 @@ export default function Page() {
   const [room_id, setRoom_id] = useState<string>("");
   const [popUp, setPopUp] = useState<string>("");
   const [socketInstance, setSocketInstance] = useState<Socket | null>(null);
+  const [loading, setLoading]= useState<boolean>(false);
   
 
   useEffect(()=>{
@@ -44,8 +45,9 @@ export default function Page() {
       result += characters.charAt(randomIndex);
 
     }
-
+    setLoading(true);
     try{
+      
       const url = roomEndPoints.CREATE_REQUEST;
       const method = 'POST';
       const data = {
@@ -62,8 +64,11 @@ export default function Page() {
 
       router.push('/room/' + result);
     } catch (error:any){
+
       toast.error(error.message);
     } 
+    setLoading(false);
+    
   }
 
   const handleJoinRoom = async (userName:String) => {
@@ -122,7 +127,7 @@ export default function Page() {
   const renderComponent = () => {
     switch (popUp) {
       case 'A':
-        return <PopUpBox Heading="Creating Room" action="Create Room" handleClose={()=>setPopUp('')} handle={createRoomHandle}/>;
+        return <PopUpBox Heading="Creating Room" action="Create Room" handleClose={()=>setPopUp('')} handle={createRoomHandle} loading={loading}/>;
       case 'B':
         return <PopUpBox Heading="Joining Room" action="Request to Join" handleClose={()=>setPopUp('')} handle={requestJoin}/>;
       case 'C':

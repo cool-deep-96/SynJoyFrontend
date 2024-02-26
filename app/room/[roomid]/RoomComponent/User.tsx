@@ -4,6 +4,7 @@ import PopUpBox from '@/app/Component/PopUpBox'
 import toast from 'react-hot-toast'
 import { roomEndPoints } from '@/app/ApiHandler/apiList'
 import apicall from '@/app/ApiHandler/apicall'
+import Rectangle from '@/app/Component/Skeleton/Rectangle'
 
 interface userProps{
     room_id: string
@@ -44,8 +45,17 @@ const User = ({room_id}: userProps) => {
 
 
   return (
-    <div className='absolute bg-gray-700 right-0 w-72 bg-gray-200 p-2 rounded-xl h-72 lg:h-96 overflow-hidden overflow-scroll overflow-x-hidden'>
-        {
+    <div className='absolute bg-gray-700 right-0 w-72  py-3 px-2 rounded-xl h-72 lg:h-96  overflow-scroll overflow-x-hidden overflow-y-hidden'>
+        {data.length===0? 
+        <div className='h-full w-full'>
+            <Rectangle h="h-8" rounded='rounded-lg' m="mt-4"/>
+            <Rectangle h="h-8" rounded='rounded-lg' m="mt-4"/>
+            <Rectangle h="h-8" rounded='rounded-lg' m="mt-4"/>
+            <Rectangle h="h-8" rounded='rounded-lg' m="mt-4"/>
+            <Rectangle h="h-8" rounded='rounded-lg' m="mt-4"/>
+            <Rectangle h="h-8" rounded='rounded-lg' m="mt-4"/>
+            
+        </div> :
             data.map((user, index)=>{
                 return(
                     <div key={index}
@@ -65,11 +75,12 @@ const User = ({room_id}: userProps) => {
 
 interface userButtomProps{
     handleUserSwitch: ()=> void,
-    room_id: string
+    room_id: string,
+    open: boolean
 }
 
 
-export const UserButton = ({handleUserSwitch, room_id}: userButtomProps)=>{
+export const UserButton = ({handleUserSwitch, room_id, open}: userButtomProps)=>{
     const socket = useSocketUser()?.socket
     const [popUp, setPopUp] = useState<string|null>();
     const [userRequesting, setUserRequesting] = useState<string|null>()
@@ -111,7 +122,7 @@ export const UserButton = ({handleUserSwitch, room_id}: userButtomProps)=>{
         <>
         {renderComponent()}
         <button onClick={handleUserSwitch}
-        className="bg-gray-900 px-2 py-1 rounded-xl">users</button>
+        className={`${open? 'bg-slate-900 text-white':'bg-slate-600 text-white'} px-3 py-1 rounded-xl `}>Users</button>
         
         </>
         

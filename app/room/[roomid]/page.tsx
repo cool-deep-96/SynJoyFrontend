@@ -28,8 +28,8 @@ export default function Room({ params }: Params) {
                 <div className="text-lg pt-2 pb-4 w-full flex flex-row justify-between px-4">
                     <div>~{isClient ? userName : ''}</div>
                  <div className="hover:cursor-pointer" onClick={() => { if (navigator.clipboard) { navigator.clipboard.writeText(room_id) } toast.success('Room Id Copied') }}> {room_id}</div>
-                    <div className="relative z-10">
-                        <UserButton handleUserSwitch={() => setUserSwitch(!userSwitch)} room_id={room_id} />
+                    <div className="relative z-[3]">
+                        <UserButton handleUserSwitch={() => setUserSwitch(!userSwitch)} room_id={room_id} open={userSwitch}/>
                         {userSwitch && <User room_id={room_id} />}
                     </div>
                 </div>
