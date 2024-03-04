@@ -77,7 +77,7 @@ const VideoPlayer = ({ room_id, userName }: Props) => {
 
         }
 
-    }, [socket, videoId]);
+    }, [socket, videoId, duration]);
 
     const youtubeMetaData = async () => {
         const time = await player?.getDuration();
