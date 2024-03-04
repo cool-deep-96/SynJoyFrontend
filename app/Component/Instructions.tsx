@@ -16,7 +16,7 @@ const Instructions = () => {
         </div>
         <div className="flex justify-evenly mb-5 text-xl">
             <button className={`${mode? 'bg-red-700':'bg-gray-900'} px-5 py-3 rounded-l-lg w-1/2 font-semibold`} onClick={()=>setMode(true)}>YouTube</button>
-            <button className={`${mode? 'bg-gray-900':'bg-yellow-700'} px-5 py-3 roundedr-r-lg w-1/2 font-semibold`} onClick={()=>setMode(false)}>File Storage</button>
+            <button className={`${mode? 'bg-gray-900':'bg-yellow-500'} px-5 py-3 rounded-r-lg w-1/2 font-semibold`} onClick={()=>setMode(false)}>File Storage</button>
         </div>
         <div className="flex flex-col gap-10 ">
           {mode? (
@@ -24,7 +24,7 @@ const Instructions = () => {
             instructionData2.map((data, index)=>{
               return(
                 <div key={index}>
-                    <Instruction imgSrc={`${data.imgSrc}`} order={data.order} heading={data.heading}  description={data.description} link={data.link}/>
+                    <Instruction {...data}/>
                 </div>
 
 
@@ -35,7 +35,7 @@ const Instructions = () => {
                 instructionData.map((data, index)=>{
                     return(
                       <div key={index}>
-                          <Instruction imgSrc={`${data.imgSrc}`} order={data.order} heading={data.heading}  description={data.description} link={data.link}/>
+                          <Instruction {...data}/>
                       </div>
       
       

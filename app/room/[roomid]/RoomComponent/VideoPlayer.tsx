@@ -25,15 +25,19 @@ const VideoPlayer = ({ room_id, userName }: Props) => {
     var [videoId, setVideoId] = useState<string|null>('')
 
     const videoRef = useRef<HTMLVideoElement | null>(null);
-
+    const progressBarRef = useRef<HTMLDivElement | null>(null);
+    const progressBeforeRef = useRef<HTMLDivElement| null>(null); 
+    const containerRef = useRef<HTMLDivElement | null>(null);
+    const seekBoxRef = useRef<HTMLDivElement| null>(null);
+    
 
     const [isControls, setIsControls] = useState<boolean>(true);
     const [isPlaybackOption, setIsPlaybackOptions] = useState<boolean>(false);
 
     const [duration, setDuration] = useState<number>(0);
     const [currentTimePlayed, setCurrentTimePlayed] = useState<number>(0);
-    const progressBarRef = useRef<HTMLInputElement | null>(null);
-    const containerRef = useRef<HTMLDivElement | null>(null)
+    const [seekTime, setSeekTime]= useState<number>(0);
+
     const [isFullScreen, setIsFullScreen] = useState<Boolean>(false);
 
     let animationId: number;
@@ -42,7 +46,7 @@ const VideoPlayer = ({ room_id, userName }: Props) => {
         if (socket) {
             socket.on('pause', async (second, userName) => {
                 if (videoRef.current || videoId) {
-                    progressBarRef.current!.value = `${second}`
+                    progressBeforeRef.current!.style.width = `${(second/duration)*100}%`
                     setCurrentTimePlayed(second)
                     videoId?  await player?.seekTo(second) : videoRef.current!.currentTime = second ;
                     videoId?  player?.pauseVideo():videoRef.current?.pause();
@@ -54,7 +58,7 @@ const VideoPlayer = ({ room_id, userName }: Props) => {
 
             socket.on('play', async (second, userName) => {
                 if (videoRef.current || videoId) {
-                    progressBarRef.current!.value = `${second}`;
+                    progressBeforeRef.current!.style.width = `${(second/duration)*100}%`
                     setCurrentTimePlayed(second);
                     videoId?  await player?.seekTo(second) : videoRef.current!.currentTime = second ;
                     videoId? player?.playVideo() : videoRef.current?.play();
@@ -153,20 +157,25 @@ const VideoPlayer = ({ room_id, userName }: Props) => {
 
 
     const sliding = async () => {
-        const time = videoId? await player?.getCurrentTime() :videoRef.current?.currentTime 
-        progressBarRef.current!.value = `${time}` || "0";
-        setCurrentTimePlayed(parseInt(progressBarRef.current?.value || "0", 10));
-        progressBarRef.current?.style.setProperty('--selected-region', `${(parseInt(progressBarRef.current?.value || "0", 10) / duration) * 100}%`)
-        animationId = requestAnimationFrame(sliding);
+        if(progressBarRef.current && progressBeforeRef.current){
+
+            const time = videoId? await player?.getCurrentTime() :videoRef.current?.currentTime 
+            progressBeforeRef.current.style.width = `${(time/duration)*100}%`
+            setCurrentTimePlayed(time);
+            animationId = requestAnimationFrame(sliding);
+        }
     }
 
     const changeRange = async () => {
-        const currentTimeInSeconds = parseInt(progressBarRef.current?.value || "0", 10);
-        videoId? await player?.seekTo(currentTimeInSeconds):videoRef.current!.currentTime = currentTimeInSeconds 
-        progressBarRef.current?.style.setProperty('--selected-region', `${(parseInt(progressBarRef.current?.value || "0", 10) / duration) * 100}%`)
-        setCurrentTimePlayed(parseInt(progressBarRef.current?.value || "0", 10));
-        
-        socket && socket.emit('pause', currentTimeInSeconds, userName);
+        if(progressBarRef.current && progressBeforeRef.current)
+        {
+            const currentTimeInSeconds = seekTime;
+            videoId? await player?.seekTo(currentTimeInSeconds):videoRef.current!.currentTime = currentTimeInSeconds 
+            progressBeforeRef.current.style.width = `${(seekTime/duration)*100}%`
+            setCurrentTimePlayed(seekTime);
+            
+            socket && socket.emit('pause', currentTimeInSeconds, userName);
+        }
     }
 
     const handleYoutUbeUrl = (e: any) => {
@@ -191,6 +200,28 @@ const VideoPlayer = ({ room_id, userName }: Props) => {
             containerRef.current?.requestFullscreen();
             setIsFullScreen(true);
         }
+    }
+
+    const seekingHandle = (e:MouseEvent)=>{
+        if(progressBarRef.current && seekBoxRef.current){
+            const range = progressBarRef.current.getBoundingClientRect();
+    
+
+            if(e.clientX + seekBoxRef.current.clientWidth <= range.right){
+                seekBoxRef.current.style.left = `${e.clientX}px`
+            } else {
+                seekBoxRef.current.style.left = `${range.right-(seekBoxRef.current.clientWidth + 5)}px`
+            }
+
+            if(e.clientX>range.left && e.clientX<range.right){
+                const todisplayTime = (((e.clientX - range.left) )/range.width) * duration;
+                setSeekTime(todisplayTime);
+            }
+
+            
+        }
+        
+
     }
 
 
@@ -222,20 +253,31 @@ const VideoPlayer = ({ room_id, userName }: Props) => {
                         
                     </div>
                     {videoUrl && <video
+                   
                         ref={videoRef}
                         onClick={handleVideo}
                         onMouseMove={() => { setIsControls(true); clearTimeout(timer); hideControls() }}
                         onTouchStart={() => setIsControls(true)}
                         onTouchEnd={() => hideControls()} >
-                        <source src={videoUrl === '' ? '' : videoUrl} />
+                        <source src={videoUrl === '' ? '' : videoUrl} 
+                        />
                     </video>}
                     <div className={`${isControls ? '' : 'hidden'} absolute bottom-0  w-full h-16 md:h-24 lg:h-28 z-10 bg-black bg-opacity-40`}
                         onMouseOver={() => { clearTimeout(timer) }}>
                         <div className={` w-full flex flex-col `}  >
                             <div className="mb-4" >
-                                <div className="progress-area flex flex-col">
-                                    <input type="range" className='w-full' defaultValue="0" ref={progressBarRef} max={`${duration}`}
-                                        onChange={changeRange} />
+                                <div className="progress-area flex flex-col relative group/progress bg-white h-[6px] mx-1 rounded-full"
+                                    onMouseMove={(e: any)=>seekingHandle(e)} ref={progressBarRef}
+                                    onClick={()=>{changeRange()}}
+                                >
+                                    <div className='absolute left-0 h-full bg-blue-500 rounded-full flex justify-end items-center' ref={progressBeforeRef}>
+                                        <div className='h-[15px] w-[15px] bg-blue-500 rounded-full'></div>
+                                    </div>
+                                    <div className='absolute bottom-full text-sm font-light -translate-y-2 bg-black px-1 rounded-md group-hover/progress:flex hidden' ref={seekBoxRef}>
+                            
+                                           {`${formatTime(seekTime || 0)}`}
+                                       
+                                    </div>
                                 </div>
                             </div>
                             <div className="flex flex-row justify-between md:my-2">

@@ -9,7 +9,7 @@ const HomeIntro = () => {
           <div className="max-w-[32rem] px-4 relative">
 
           <div className="absolute inline-block bottom-full mb-10 lg:mb-16">
-          <Image className="h-24 w-auto rounded-xl" src='/images/Logo.png' alt="" width={1080} height={1080} />
+          <Image className="h-24 w-auto rounded-xl" src='/images/logo.svg' alt="" width={1080} height={1080} />
         </div>
 
 
