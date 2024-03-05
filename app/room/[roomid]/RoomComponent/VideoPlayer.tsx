@@ -1,5 +1,5 @@
 "use client"
-import React, { useEffect, useRef, useState } from 'react'
+import React, { MouseEvent, useEffect, useRef, useState } from 'react'
 import { useSocketUser } from '../SocketContextProvider/SocketContext';
 import { ExitFullscreen, Forward, FullScreen, MuteButton, PauseButton, PictureInPictureAlt, PlayButton, Rewind, SlowMotionVideo, Unmute } from '@/app/Component/AllIcons';
 import toast from 'react-hot-toast';
@@ -224,6 +224,23 @@ const VideoPlayer = ({ room_id, userName }: Props) => {
 
     }
 
+    const drag=(e:MouseEvent<HTMLDivElement>)=>{
+
+        const handleMouseMove = (event:any)=>{
+            if(progressBeforeRef.current){
+                progressBeforeRef.current.style.width = `${progressBeforeRef.current.clientWidth+ event.movementX}px`
+            }
+        }
+
+        const handleMouseUp= (event:any)=>{
+            e.target.removeEventListener('mousemove', handleMouseMove);
+        }
+        e.target.addEventListener('mousemove', handleMouseMove, false)
+        e.target.addEventListener('mouseup', handleMouseUp);
+        e.target.addEventListener('mouseleave', handleMouseUp)
+
+    }
+
 
     return (
         <>
@@ -271,9 +288,9 @@ const VideoPlayer = ({ room_id, userName }: Props) => {
                                     onClick={()=>{changeRange()}}
                                 >
                                     <div className='absolute left-0 h-full bg-blue-500 rounded-full flex justify-end items-center' ref={progressBeforeRef}>
-                                        <div className='h-[15px] w-[15px] bg-blue-500 rounded-full'></div>
+                                        <div className='h-[15px] w-[15px] bg-blue-500 rounded-full translate-x-[50%] hover:cursor-pointer active:bg-blue-800' onMouseDown={(e:MouseEvent<HTMLDivElement>)=>drag(e)} ></div>
                                     </div>
-                                    <div className='absolute bottom-full text-sm font-light -translate-y-2 bg-black px-1 rounded-md group-hover/progress:flex hidden' ref={seekBoxRef}>
+                                    <div className='absolute bottom-full text-sm font-light -translate-y-2 bg-black px-1 rounded-md group-hover/progress:flex hidden select-none' ref={seekBoxRef}>
                             
                                            {`${formatTime(seekTime || 0)}`}
                                        
@@ -284,14 +301,14 @@ const VideoPlayer = ({ room_id, userName }: Props) => {
                                 <div className="mx-1 flex flex-row gap-2">
                                     <button className=""
                                         onClick={() => { setIsMuted(!isMuted); videoId? (isMuted? player?.unMute() :player?.mute()): videoRef.current!.muted = !isMuted}}>{isMuted ? <MuteButton /> : <Unmute />}</button>
-                                    <div className="">
+                                    <div className="select-none drop-shadow-lg">
                                         {`${formatTime(currentTimePlayed || 0)}/${formatTime(duration || 0)}`}
                                     </div>
                                 </div>
                                 <div className="flex flex-row gap-3 md:gap-5 lg:gap-10">
-                                    <button className="skip-backward" onClick={() => handleSkip(-10)}><Rewind /></button>
+                                    <button className="skip-backward active:scale-95" onClick={() => handleSkip(-10)}><Rewind /></button>
                                     <button className="play-pause" onClick={handleVideo}>{isPlaying ? <PauseButton /> : <PlayButton />}</button>
-                                    <button className="skip-forward" onClick={() => handleSkip(10)}><Forward /></button>
+                                    <button className="skip-forward active:scale-95" onClick={() => handleSkip(10)}><Forward /></button>
                                 </div>
                                 <div className="mr-1 flex flex-row gap-3 md:gap-5">
                                     <div className="flex relative">
