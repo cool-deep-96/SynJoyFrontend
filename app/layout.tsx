@@ -45,7 +45,7 @@ export const metadata: Metadata = {
 
 
   openGraph: {
-    images: ['/images/logo2.png'],
+    images: ['/images/logoS.png'],
   },
 }
 
