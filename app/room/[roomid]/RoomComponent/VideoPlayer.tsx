@@ -233,11 +233,12 @@ const VideoPlayer = ({ room_id, userName }: Props) => {
         }
 
         const handleMouseUp= (event:any)=>{
-            e.target.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mousemove', handleMouseMove);
+            document.removeEventListener('mouseup', handleMouseUp);
         }
-        e.target.addEventListener('mousemove', handleMouseMove, false)
-        e.target.addEventListener('mouseup', handleMouseUp);
-        e.target.addEventListener('mouseleave', handleMouseUp)
+        document.addEventListener('mousemove', handleMouseMove, false)
+        document.addEventListener('mouseup', handleMouseUp);
+       
 
     }
 
