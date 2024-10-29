@@ -17,7 +17,7 @@ export default function RootLayout({
 }) {
   return (
     <div className={`${inter.className} h-screen text-white bg-black`}>
-      <div className='text-center text-xl '>Room</div>
+      {/* <div className='text-center text-xl '>Room</div> */}
       {children}
 
     </div>

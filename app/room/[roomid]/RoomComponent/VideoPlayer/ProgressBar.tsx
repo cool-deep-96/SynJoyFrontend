@@ -1,0 +1,168 @@
+import React, {
+  MouseEvent,
+  TouchEvent,
+  useContext,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
+import { formatTime } from "./utils";
+import { useVideo } from "./VideoPlayerContext";
+
+const ProgressBar = () => {
+  const progressBeforeRef = useRef<HTMLDivElement | null>(null);
+  const progressBarRef = useRef<HTMLDivElement | null>(null);
+  const [seekingTime, setSeekTime] = useState<number>(0);
+  const seekingTimeRef = useRef<number>(0);
+  const [showSeekTime, setShowSeekTime] = useState<boolean>(false);
+  const [isDragging, setIsDragging] = useState<boolean>(false);
+
+  const { currentTime, duration, setCurrentTimeHandle } = useVideo();
+
+  // Update progress bar width when currentTime or duration changes
+  useEffect(() => {
+    if (!isDragging && progressBeforeRef.current && duration > 0) {
+      const fraction = currentTime / duration;
+      const newWidth = fraction * 100;
+      progressBeforeRef.current.style.width = `${newWidth}%`;
+    }
+  }, [currentTime, duration, isDragging]);
+
+  const handleShowSeekTime = () => {
+    if (!isDragging) {
+      setShowSeekTime(false);
+    }
+  };
+
+  // Handle the progress bar seeking logic on click
+  const handleClick = (e: MouseEvent<HTMLDivElement>) => {
+    if (progressBarRef.current && progressBeforeRef.current) {
+      const rect = progressBarRef.current.getBoundingClientRect();
+      const clickX = e.clientX - rect.left;
+      const progressBarWidth = rect.width;
+      const fraction = clickX / progressBarWidth;
+      const newWidth = fraction * 100;
+      progressBeforeRef.current.style.width = `${newWidth}%`;
+
+      setCurrentTimeHandle(fraction * duration);
+    }
+  };
+
+  // Common logic to handle progress bar movement for both mouse and touch events
+  const updateProgressBar = (clientX: number) => {
+    if (progressBeforeRef.current && progressBarRef.current) {
+      const rect = progressBarRef.current.getBoundingClientRect();
+      const clickX = clientX - rect.left;
+      const progressBarWidth = rect.width;
+      const fraction = Math.min(Math.max(clickX / progressBarWidth, 0), 1); // Ensure it's between 0 and 1
+
+      // Update the width of the progress bar
+      const newWidth = fraction * 100;
+      progressBeforeRef.current.style.width = `${newWidth}%`;
+
+      // Update both the state and the ref with the latest seeking time
+      const newSeekingTime = fraction * duration;
+      setSeekTime(newSeekingTime);
+      seekingTimeRef.current = newSeekingTime;
+      setIsDragging(true);
+    }
+  };
+
+  const drag = (e: MouseEvent<HTMLDivElement>) => {
+    const handleMouseMove = (event: any) => {
+      updateProgressBar(event.clientX);
+    };
+
+    const handleMouseUp = () => {
+      if (progressBeforeRef.current) {
+        const newWidth = (seekingTimeRef.current / duration) * 100;
+        progressBeforeRef.current.style.width = `${newWidth}%`;
+      }
+      setCurrentTimeHandle(seekingTimeRef.current);
+      setIsDragging(false);
+      setShowSeekTime(false);
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+  };
+
+  // Touch drag handling
+  const touchDrag = (e: TouchEvent<HTMLDivElement>) => {
+    const handleTouchMove = (event: any) => {
+      updateProgressBar(event.touches[0].clientX); // Use the touch X position
+    };
+
+    const handleTouchEnd = () => {
+      setCurrentTimeHandle(seekingTimeRef.current); // Finalize seek time
+      setIsDragging(false);
+      document.removeEventListener("touchmove", handleTouchMove);
+      document.removeEventListener("touchend", handleTouchEnd);
+    };
+
+    document.addEventListener("touchmove", handleTouchMove);
+    document.addEventListener("touchend", handleTouchEnd);
+  };
+
+  // Handle hover to show the time at the hover position
+  const handleHover = (e: MouseEvent<HTMLDivElement>) => {
+    if (progressBarRef.current) {
+      const rect = progressBarRef.current.getBoundingClientRect();
+      const hoverX = e.clientX - rect.left;
+      const progressBarWidth = rect.width;
+      const hoverFraction = Math.min(Math.max(hoverX / progressBarWidth, 0), 1); // Ensure it's between 0 and 1
+
+      // Calculate hover time and set it in state
+      setSeekTime(hoverFraction * duration);
+      setShowSeekTime(true);
+    }
+  };
+
+  // Clear hover time when not hovering
+
+  return (
+    <div className="flex flex-col gap-3 md:flex-col-reverse">
+      <div className="text-xs md:text-sm select-none">
+        <p>
+          {formatTime(currentTime)} / {formatTime(duration)}
+        </p>
+      </div>
+
+      <div
+        className="progress-area relative group/progress hover:cursor-pointer bg-gray-200 h-1 lg:h-2 rounded-full w-full"
+        ref={progressBarRef}
+        onClick={handleClick}
+        onMouseMove={handleHover}
+        onMouseLeave={handleShowSeekTime}
+      >
+        {/* Progress before (filled part) */}
+        <div
+          className="absolute left-0 h-full bg-red-500 rounded-full flex justify-end items-center"
+          ref={progressBeforeRef}
+        >
+          <div
+            className="h-2 w-2 lg:h-3 lg:w-3 hover:h-3 hover:w-3 lg:hover:h-4 lg:hover:w-4 bg-blue-500 rounded-full translate-x-[50%] hover:cursor-pointer active:bg-red-700 duration-300 transition-all ease-in-out"
+            onMouseDown={drag}
+            onTouchStart={touchDrag}
+          ></div>
+        </div>
+
+        {/* Hover time display */}
+
+        <div
+          className={`absolute left-[50%] -translate-x-1/2 bottom-full text-sm font-light -translate-y-7 bg-black px-1 rounded-md ${
+            showSeekTime ? "flex" : "hidden"
+          }  select-none duration-300 transition-all ease-in-out`}
+        >
+          {formatTime(seekingTime)}
+        </div>
+
+        {/* Current time display */}
+      </div>
+    </div>
+  );
+};
+
+export default ProgressBar;

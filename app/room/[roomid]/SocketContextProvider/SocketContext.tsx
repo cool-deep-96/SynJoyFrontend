@@ -1,89 +1,114 @@
-"use client"
+"use client";
 
-import { SERVER_URL } from '@/app/ApiHandler/apiList';
-import { redirect } from 'next/navigation';
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import toast from 'react-hot-toast';
-import { Socket, io } from 'socket.io-client';
+import React, {
+  createContext,
+  useCallback,
+  useContext,
+  useEffect,
+  useState,
+} from "react";
+import apiCall from "@/app/ApiHandler/api_call";
+import { roomEndPoints, SERVER_URL } from "@/app/ApiHandler/api_list";
+import { jwtDecode } from "jwt-decode";
+import { useRouter } from "next/navigation"; // Import useRouter
+import toast from "react-hot-toast";
+import { Socket, io } from "socket.io-client";
+import { TokenData } from "@/interfaces/interfaces";
+
 
 interface SocketContextProps {
   children: React.ReactNode;
-  room_id: string,
 }
 
 interface SocketUserContextProps {
   socket: Socket | null;
-  liveUsers: string[];
-
+  tokenData: TokenData | null;
+  token: string | null;
+  updateTokenData: (tokenData: TokenData) => void;
 }
 
 const SocketUserContext = createContext<SocketUserContextProps>({
   socket: null,
-  liveUsers: []
-
+  tokenData: null,
+  token: null,
+  updateTokenData: ()=>{}
 });
 
-export const SocketProvider: React.FC<SocketContextProps> = ({ children , room_id}) => {
+export const SocketProvider: React.FC<SocketContextProps> = ({ children }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
-  const [userName, setUserName] = useState<string | null>(
-    typeof window !== 'undefined' ? window.localStorage.getItem('userName') : null
-  );
-  const [liveUsers, setLiveUsers] = useState<string[]>([])
+  const [tokenData, setTokenData] = useState<TokenData | null>(null);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [token, setToken] = useState<string| null>(null);
+  const router = useRouter(); 
+
+  // Function to verify the token with the server
+  const verifyTokenWithServer = useCallback(async (token: string) => {
+    try {
+      const url = roomEndPoints.ATTEMPT_ROOM;
+      const method = "PUT";
+      const headers = {
+        Authorization: `Bearer ${token}`,
+      };
+      const response = await apiCall(method, url, null, headers);
+      localStorage.setItem("jwtToken", response.jwtToken);
+      updateTokenData(jwtDecode<TokenData>(response.jwtToken));
+      setToken(token) // Decode and set the user data
+      return true;
+    } catch (error) {
+      if ((error as Error).message !== "Network Error") {
+        localStorage.removeItem("jwtToken");
+        // router.push("/room"); // Use router.push for client-side redirect
+      }
+      toast.error((error as Error).message);
+      return false;
+    }
+  }, [router]);
 
   useEffect(() => {
-    if(userName != null){
-      try{
-
-        const socketInstance = io(SERVER_URL||'');
-        socketInstance.emit('roomjoin', room_id, userName, (error: string|null, acknowledgement?: string|null)=>{
-          if(error){
-            toast.error(error);
-            window.localStorage.clear(); 
-          }else {
-            
-            toast.success(acknowledgement || '');
+    if (typeof window !== "undefined") {
+      const token = window.localStorage.getItem("jwtToken");
+      if (token) {
+        // Verify the token with the server
+        verifyTokenWithServer(token).then((isVerified) => {
+          if (isVerified) {
+            createSocketInstance(jwtDecode<TokenData>(token));
           }
+          setLoading(false); // Set loading to false after verification
         });
-
-        socketInstance.on('connect_error', ()=>{
-          toast.error('Failed to connect to the server. Please try again later.')
-        });
-        
-        socketInstance.on('notify', (arg)=>{
-            toast.success(arg)
-        });
-
-        socketInstance.on('liveusers', (liveUsers)=>{
-          setLiveUsers(liveUsers)
-        } )
-
-
-
-        setSocket(socketInstance);
-      }catch(error:any){
-        toast.error('Recconneting....')
+      } else {
+        // router.push("/room"); // Redirect if no token is found
       }
     }
-  }, [userName, room_id]);
+  }, [verifyTokenWithServer, router]);
 
-  useEffect(() => {
-    if (typeof window !== 'undefined' && userName == null) {
-      redirect('/room');
-    }
-  }, [userName]);
-  
+  // Function to connect to the main room socket
+  const createSocketInstance = (tokenData: TokenData) => {
+    const socketInstance = io(SERVER_URL || "");
+    socketInstance.on("connect", () => {
+      console.log(`Connected to socket server with ID: ${socketInstance.id} ${tokenData.id}`);
+      socketInstance.emit("register", {
+         userId: tokenData.id, roomId: tokenData.roomId ,
+      });
+    });
+    setSocket(socketInstance);
+  };
+
+  const updateTokenData = (newTokenData: TokenData) => {
+    setTokenData(newTokenData)
+  }
+
+  // // Render loading state or the UI
+  // if (loading) {
+  //   return <div>Loading...</div>; // Show a loading indicator while verifying the token
+  // }
 
   return (
-    <SocketUserContext.Provider value={{ socket, liveUsers}}>
+    <SocketUserContext.Provider value={{ socket, tokenData , token, updateTokenData }}>
       {children}
     </SocketUserContext.Provider>
   );
-
-
 };
 
-
-export const useSocketUser = (): SocketUserContextProps |null => {
+export const useSocketUser = (): SocketUserContextProps | null => {
   return useContext(SocketUserContext);
 };
-
