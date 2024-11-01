@@ -13,7 +13,7 @@ const Waiting: React.FC = () => {
   useEffect(() => {
     if (socket) {
       socket.on("join-approve-channel", async (payload) => {
-        if (payload.approved) {
+        if (payload.isMember) {
           try {
             // Fetch a new token from your refresh endpoint
             const url = tokenEndPoints.REFRESH_TOKEN;
@@ -36,13 +36,14 @@ const Waiting: React.FC = () => {
         } else {
           toast.error(
             "Your join request was rejected. Please try again later."
-          );
+          );   
         }
       });
 
       // Cleanup the event listener on unmount
       return () => {
-        socket.off("join-request-channel");
+        console.log("join-approve-channel cleanup called")
+        socket.off("join-approve-channel");
       };
     }
   }, [socket, token, updateTokenData]);

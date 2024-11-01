@@ -66,10 +66,12 @@ interface JoinRoomPayload {
 }
 
 interface TokenData {
-  id: string;
-  userName: string;
-  roomId: string;
-  approved: boolean;
+  id: string
+  userName: string
+  roomId: string
+  expireAt: Date
+  isMember: boolean
+  isOwner: boolean
 }
 
 export type {

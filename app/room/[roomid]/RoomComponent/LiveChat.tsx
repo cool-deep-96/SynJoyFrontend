@@ -1,7 +1,8 @@
-import InputBox from "./InputBox";
+import InputBox from "./Chat/InputBox";
 import LiveChatHead from "./LiveChatHead";
-import ChatBox from "./ChatBox";
 import Info from "./Info";
+import ChatBox from "./Chat/ChatBox";
+import ChatProvider from "./Chat/ChatProvider";
 
 const LiveChat = () => {
   return (
@@ -9,9 +10,13 @@ const LiveChat = () => {
       <Info />
       <LiveChatHead />
       <div className="flex-grow overflow-y-auto ">
-        <ChatBox />
+        <ChatProvider>
+          <ChatBox />
+        </ChatProvider>
       </div>
-      <InputBox />
+      <ChatProvider>
+        <InputBox />
+      </ChatProvider>
     </div>
   );
 };

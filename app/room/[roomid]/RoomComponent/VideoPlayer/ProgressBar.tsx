@@ -16,6 +16,7 @@ const ProgressBar = () => {
   const seekingTimeRef = useRef<number>(0);
   const [showSeekTime, setShowSeekTime] = useState<boolean>(false);
   const [isDragging, setIsDragging] = useState<boolean>(false);
+  const thumbRef = useRef<HTMLDivElement | null>(null);
 
   const { currentTime, duration, setCurrentTimeHandle } = useVideo();
 
@@ -49,28 +50,30 @@ const ProgressBar = () => {
   };
 
   // Common logic to handle progress bar movement for both mouse and touch events
-  const updateProgressBar = (clientX: number) => {
-    if (progressBeforeRef.current && progressBarRef.current) {
+  const slideThumb = (clientX: number) => {
+    if (
+      progressBarRef.current &&
+      thumbRef.current
+    ) {
+      setIsDragging(true);
       const rect = progressBarRef.current.getBoundingClientRect();
       const clickX = clientX - rect.left;
       const progressBarWidth = rect.width;
       const fraction = Math.min(Math.max(clickX / progressBarWidth, 0), 1); // Ensure it's between 0 and 1
 
-      // Update the width of the progress bar
-      const newWidth = fraction * 100;
-      progressBeforeRef.current.style.width = `${newWidth}%`;
+      const thumbPosition = fraction * progressBarWidth;
+      thumbRef.current.style.left = `${thumbPosition}px`;
 
       // Update both the state and the ref with the latest seeking time
       const newSeekingTime = fraction * duration;
       setSeekTime(newSeekingTime);
       seekingTimeRef.current = newSeekingTime;
-      setIsDragging(true);
     }
   };
 
   const drag = (e: MouseEvent<HTMLDivElement>) => {
     const handleMouseMove = (event: any) => {
-      updateProgressBar(event.clientX);
+      slideThumb(event.clientX);
     };
 
     const handleMouseUp = () => {
@@ -92,7 +95,7 @@ const ProgressBar = () => {
   // Touch drag handling
   const touchDrag = (e: TouchEvent<HTMLDivElement>) => {
     const handleTouchMove = (event: any) => {
-      updateProgressBar(event.touches[0].clientX); // Use the touch X position
+      slideThumb(event.touches[0].clientX); // Use the touch X position
     };
 
     const handleTouchEnd = () => {
@@ -124,6 +127,7 @@ const ProgressBar = () => {
 
   return (
     <div className="flex flex-col gap-3 md:flex-col-reverse">
+      {/* Current time display */}
       <div className="text-xs md:text-sm select-none">
         <p>
           {formatTime(currentTime)} / {formatTime(duration)}
@@ -139,11 +143,14 @@ const ProgressBar = () => {
       >
         {/* Progress before (filled part) */}
         <div
-          className="absolute left-0 h-full bg-red-500 rounded-full flex justify-end items-center"
+          className={`absolute left-0 h-full bg-red-500 rounded-full flex  ${
+            isDragging ? "" : " justify-end"
+          } items-center`}
           ref={progressBeforeRef}
         >
           <div
-            className="h-2 w-2 lg:h-3 lg:w-3 hover:h-3 hover:w-3 lg:hover:h-4 lg:hover:w-4 bg-blue-500 rounded-full translate-x-[50%] hover:cursor-pointer active:bg-red-700 duration-300 transition-all ease-in-out"
+            ref={thumbRef}
+            className={`${isDragging ? "absolute": ""} h-2 w-2 lg:h-3 lg:w-3 hover:h-3 hover:w-3 lg:hover:h-4 lg:hover:w-4 bg-blue-500 translate-x-[50%] rounded-full hover:cursor-pointer active:bg-red-700 duration-300 transition-colors ease-in-out`}
             onMouseDown={drag}
             onTouchStart={touchDrag}
           ></div>
@@ -158,8 +165,6 @@ const ProgressBar = () => {
         >
           {formatTime(seekingTime)}
         </div>
-
-        {/* Current time display */}
       </div>
     </div>
   );

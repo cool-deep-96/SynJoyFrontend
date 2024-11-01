@@ -4,7 +4,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import { EllipsisVertical } from "lucide-react";
-import RoomDelete from "./alert_dialog.tsx/RoomDelete";
+import RoomDelete from "./alert_dialog/RoomDelete";
 
 const ThreeDot = () => {
   return (

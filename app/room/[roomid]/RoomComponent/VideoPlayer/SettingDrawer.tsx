@@ -1,7 +1,7 @@
 import { Drawer, DrawerContent, DrawerTrigger } from "@/components/ui/drawer";
 import { Settings, UsersRound } from "lucide-react";
 import React from "react";
-import MembersList from "../MembersList";
+
 import SettingPage from "./SettingPage";
 
 const SettingDrawer = () => {

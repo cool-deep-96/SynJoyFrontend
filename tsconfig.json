@@ -22,6 +22,6 @@
       "@/*": ["./*"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "app/ApiHandler/api_call.ts"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "app/ApiHandler/api_call.ts", "app/room/[roomid]/RoomComponent/alert_dialog"],
   "exclude": ["node_modules"]
 }
