@@ -11,7 +11,7 @@ export default function Room() {
   return (
     <section className="">
       {/* Conditionally render the Waiting component based on the user's approval status */}
-      {tokenData?.isMember ? (
+      {!tokenData?.isMember ? (
         <Waiting /> // Render the Waiting component if the user is not approved
       ) : 
       <Ui/>

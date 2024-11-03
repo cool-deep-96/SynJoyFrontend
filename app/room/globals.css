@@ -59,3 +59,84 @@
   0% {left : -50%; }
   100% {left: 100%;}
 }
+
+#youtubePlayer {
+  width: 100%;  /* Fill the width of the container */
+  height: 100%; /* Fill the height of the container */
+}
+
+/* HTML: <div class="loader"></div> */
+.loader {
+  width: 40px;
+  aspect-ratio: 1;
+   --c: linear-gradient(#860404 0 0);
+   --m: radial-gradient(farthest-side,#731f1f 92%,#ffffff00);
+  background: 
+    var(--c),var(--m),
+    var(--c),var(--m), 
+    var(--c),var(--m);
+  background-size: 8px 15px,8px 8px;
+  background-repeat: no-repeat;
+  animation: l14 1s infinite alternate;
+}
+@keyframes l14 {
+  0%,
+  10% {background-position: 0 0   ,0 100%,50% 0   ,50% 100%,100% 0   ,100% 100%}
+  33% {background-position: 0 100%,0 0   ,50% 0   ,50% 100%,100% 0   ,100% 100%}
+  66% {background-position: 0 100%,0 0   ,50% 100%,50% 0   ,100% 0   ,100% 100%}
+  90%,
+  100%{background-position: 0 100%,0 0   ,50% 100%,50% 0   ,100% 100%,100% 0   }
+}
+
+.pulse {
+  position: relative;
+  width: 33.6px;
+  height: 33.6px;
+}
+
+.pulse:before,
+.pulse:after {
+  width: 33.6px;
+  height: 33.6px;
+  border-radius: 50%;
+  content: '';
+  display: block;
+}
+
+.pulse:before {
+  background-color: #6e6a6a;
+  animation: pulse-7ypmgi 1s infinite ease;
+}
+
+.pulse:after {
+  animation: pulse-6r5w34 1s infinite;
+  border: 4.5px solid #6e6a6a;
+  left: 0;
+  position: absolute;
+  top: 0;
+}
+
+@keyframes pulse-7ypmgi {
+  0% {
+     transform: scale(0);
+  }
+
+  50% {
+     transform: scale(1);
+  }
+}
+
+@keyframes pulse-6r5w34 {
+  0%, 50% {
+     opacity: 0;
+  }
+
+  55% {
+     opacity: 1;
+  }
+
+  100% {
+     opacity: 0;
+     transform: scale(2);
+  }
+}

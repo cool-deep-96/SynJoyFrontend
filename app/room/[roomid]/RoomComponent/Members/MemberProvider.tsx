@@ -55,9 +55,10 @@ const MemberProvider = ({ children }: MemberProviderProps) => {
 
   const getAllMembers = useCallback(async () => {
     try {
+      if (!tokenData?.roomId) return;
       const url = membersEndPoints.GET_USER;
       const method = "GET";
-      const data = { roomId: tokenData!.roomId };
+      const data = { roomId: tokenData.roomId };
 
       const response = await apiCall(method, url, data, headers);
       const { joinedMembers, requestedMembers } = response.payload;

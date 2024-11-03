@@ -4,5 +4,6 @@ export enum SOCKET_CHANNEL {
     JOIN_APPROVE_CHANNEL="join-approve-channel", // USED TO LISTEN ACCEPT/REJECT (BY ROOM OWNER) OF JOIN REQUESTS  
     JOIN_REQUEST_CHANNEL = "join-request-channel", // USED TO LISTEN ANY NEW JOIN REQUEST (BY ROOM OWNER)
     SYNC_JOINED_LIST = "sync-joined-list", // NOTIFY ALL TO SYNC JOINED LIST
-    SYNC_CHAT_CHANNEL = "sync-chat-channel" // NOTIFY ALL TO SYN CHAT 
+    SYNC_CHAT_CHANNEL = "sync-chat-channel", // NOTIFY ALL TO SYN CHAT
+    SYNC_VIDEO_CHANNEL = "sync-video-channel" 
 }

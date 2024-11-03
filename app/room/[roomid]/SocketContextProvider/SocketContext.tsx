@@ -2,6 +2,8 @@
 
 import React, {
   createContext,
+  Dispatch,
+  SetStateAction,
   useCallback,
   useContext,
   useEffect,
@@ -25,49 +27,44 @@ interface SocketUserContextProps {
   tokenData: TokenData | null;
   token: string | null;
   updateTokenData: (tokenData: TokenData) => void;
+  openChat: boolean;
+  setOpenChat: Dispatch<SetStateAction<boolean>>;
 }
 
-const SocketUserContext = createContext<SocketUserContextProps>({
-  socket: null,
-  tokenData: null,
-  token: null,
-  updateTokenData: () => {},
-});
+const SocketUserContext = createContext<SocketUserContextProps | undefined>(undefined);
 
 export const SocketProvider: React.FC<SocketContextProps> = ({ children }) => {
   const [socket, setSocket] = useState<Socket | null>(null);
   const [tokenData, setTokenData] = useState<TokenData | null>(null);
   const [loading, setLoading] = useState<boolean>(true);
   const [token, setToken] = useState<string | null>(null);
+  const [openChat, setOpenChat] = useState<boolean>(true);
   const router = useRouter();
 
   // Memoize headers to avoid unnecessary recalculations
 
   // Function to verify the token with the server
-  const verifyTokenWithServer = useCallback(
-    async (token: string) => {
-      try {
-        const url = roomEndPoints.ATTEMPT_ROOM;
-        const method = "PUT";
-        const headers = {
-          Authorization: `Bearer ${token}`,
-        };
-        const response = await apiCall(method, url, null, headers);
-        localStorage.setItem("jwtToken", response.jwtToken);
-        updateTokenData(jwtDecode<TokenData>(response.jwtToken));
-        setToken(token); // Decode and set the user data
-        return true;
-      } catch (error) {
-        if ((error as Error).message !== "Network Error") {
-          localStorage.removeItem("jwtToken");
-          // router.push("/room"); // Use router.push for client-side redirect
-        }
-        toast.error((error as Error).message);
-        return false;
+  const verifyTokenWithServer = useCallback(async (token: string) => {
+    try {
+      const url = roomEndPoints.ATTEMPT_ROOM;
+      const method = "PUT";
+      const headers = {
+        Authorization: `Bearer ${token}`,
+      };
+      const response = await apiCall(method, url, null, headers);
+      localStorage.setItem("jwtToken", response.jwtToken);
+      updateTokenData(jwtDecode<TokenData>(response.jwtToken));
+      setToken(token); // Decode and set the user data
+      return true;
+    } catch (error) {
+      if ((error as Error).message !== "Network Error") {
+        localStorage.removeItem("jwtToken");
+        router.push("/room"); // Use router.push for client-side redirect
       }
-    },
-    [router]
-  );
+      toast.error((error as Error).message);
+      return false;
+    }
+  }, []);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -81,7 +78,7 @@ export const SocketProvider: React.FC<SocketContextProps> = ({ children }) => {
           setLoading(false); // Set loading to false after verification
         });
       } else {
-        // router.push("/room"); // Redirect if no token is found
+        router.push("/room"); // Redirect if no token is found
       }
     }
   }, [verifyTokenWithServer, router]);
@@ -105,20 +102,28 @@ export const SocketProvider: React.FC<SocketContextProps> = ({ children }) => {
     setTokenData(newTokenData);
   };
 
-  // // Render loading state or the UI
-  // if (loading) {
-  //   return <div>Loading...</div>; // Show a loading indicator while verifying the token
-  // }
+  // Render loading state or the UI
+  if (!tokenData) {
+    return (
+      <div className="h-screen w-full flex justify-center items-center select-none">
+        <div className="loader"></div>
+      </div>
+    ); // Show a loading indicator while verifying the token
+  }
 
   return (
     <SocketUserContext.Provider
-      value={{ socket, tokenData, token, updateTokenData }}
+      value={{ socket, tokenData, token, updateTokenData, openChat, setOpenChat }}
     >
       {children}
     </SocketUserContext.Provider>
   );
 };
 
-export const useSocketUser = (): SocketUserContextProps | undefined => {
-  return useContext(SocketUserContext);
+export const useSocketUser = (): SocketUserContextProps => {
+  const context = useContext(SocketUserContext);
+  if (context === undefined) {
+    throw new Error("useVideo must be used within a VideoProvider");
+  }
+  return context;
 };

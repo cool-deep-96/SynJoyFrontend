@@ -14,7 +14,7 @@ interface MessageProps {
 
 const MessageComp = ({ message }: MessageProps) => {
   return (
-    <div className={`flex  gap-2 w-fit my-2 max-w-[80%]`}>
+    <div className={`flex  gap-2 w-fit my-2 max-w-[80%] select-none`}>
       <CircleUserRound className="w-4 h-6 lg:w-6 lg:h-6" />
       <div className="relative bg-[#6A6767] lg:p-2 p-1 rounded-lg ">
         <p className="absolute lg:text-xs text-[0.60rem] font-medium right-1 bottom-1 lg:right-2 lg:bottom-2 opacity-60">
@@ -80,7 +80,7 @@ const SelfMessage = ({ message }: SelfMessageProps) => {
   }, [isPopupVisible]);
 
   return (
-    <div className="relative flex justify-self-end gap-2 w-fit my-2 max-w-[80%]">
+    <div className="select-none relative flex justify-self-end gap-2 w-fit my-2 max-w-[80%]">
       <div
         className="relative bg-[#6A6767] lg:p-2 p-1 rounded-lg min-w-20 cursor-pointer"
         onClick={togglePopup}

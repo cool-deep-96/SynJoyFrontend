@@ -1,13 +1,14 @@
 import React, {
   MouseEvent,
   TouchEvent,
-  useContext,
   useEffect,
   useRef,
   useState,
 } from "react";
 import { formatTime } from "./utils";
-import { useVideo } from "./VideoPlayerContext";
+import { SycVideoPayload, useVideo } from "./VideoPlayerContext";
+import MuteUnmute from "./MuteUnmute";
+import { useSocketUser } from "../../SocketContextProvider/SocketContext";
 
 const ProgressBar = () => {
   const progressBeforeRef = useRef<HTMLDivElement | null>(null);
@@ -18,7 +19,8 @@ const ProgressBar = () => {
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const thumbRef = useRef<HTMLDivElement | null>(null);
 
-  const { currentTime, duration, setCurrentTimeHandle } = useVideo();
+  const { currentTime, duration, source, emitVideoSyncToServer, url } = useVideo();
+  const {tokenData} = useSocketUser()
 
   // Update progress bar width when currentTime or duration changes
   useEffect(() => {
@@ -45,16 +47,20 @@ const ProgressBar = () => {
       const newWidth = fraction * 100;
       progressBeforeRef.current.style.width = `${newWidth}%`;
 
-      setCurrentTimeHandle(fraction * duration);
+      const payload: SycVideoPayload = {
+        currentTime: fraction * duration,
+        isPlaying: false,
+        source,
+        tokenData,
+        url
+      };
+      emitVideoSyncToServer(payload);
     }
   };
 
   // Common logic to handle progress bar movement for both mouse and touch events
   const slideThumb = (clientX: number) => {
-    if (
-      progressBarRef.current &&
-      thumbRef.current
-    ) {
+    if (progressBarRef.current && thumbRef.current) {
       setIsDragging(true);
       const rect = progressBarRef.current.getBoundingClientRect();
       const clickX = clientX - rect.left;
@@ -81,7 +87,14 @@ const ProgressBar = () => {
         const newWidth = (seekingTimeRef.current / duration) * 100;
         progressBeforeRef.current.style.width = `${newWidth}%`;
       }
-      setCurrentTimeHandle(seekingTimeRef.current);
+      const payload: SycVideoPayload = {
+        currentTime: seekingTimeRef.current,
+        isPlaying: false,
+        source,
+        tokenData,
+        url
+      };
+      emitVideoSyncToServer(payload);
       setIsDragging(false);
       setShowSeekTime(false);
       document.removeEventListener("mousemove", handleMouseMove);
@@ -99,7 +112,14 @@ const ProgressBar = () => {
     };
 
     const handleTouchEnd = () => {
-      setCurrentTimeHandle(seekingTimeRef.current); // Finalize seek time
+      const payload: SycVideoPayload = {
+        currentTime: seekingTimeRef.current,
+        isPlaying: false,
+        source,
+        tokenData,
+        url
+      };
+      emitVideoSyncToServer(payload); // Finalize seek time
       setIsDragging(false);
       document.removeEventListener("touchmove", handleTouchMove);
       document.removeEventListener("touchend", handleTouchEnd);
@@ -126,12 +146,13 @@ const ProgressBar = () => {
   // Clear hover time when not hovering
 
   return (
-    <div className="flex flex-col gap-3 md:flex-col-reverse">
+    <div className="flex flex-col gap-3 md:flex-col-reverse select-none">
       {/* Current time display */}
-      <div className="text-xs md:text-sm select-none">
-        <p>
+      <div className="text-xs md:text-sm select-none flex gap-3 lg:gap-5 items-center justify-start py-1 px-2 lg:py-3">
+        <p className="min-w-28">
           {formatTime(currentTime)} / {formatTime(duration)}
         </p>
+        <MuteUnmute />
       </div>
 
       <div
@@ -150,7 +171,9 @@ const ProgressBar = () => {
         >
           <div
             ref={thumbRef}
-            className={`${isDragging ? "absolute": ""} h-2 w-2 lg:h-3 lg:w-3 hover:h-3 hover:w-3 lg:hover:h-4 lg:hover:w-4 bg-blue-500 translate-x-[50%] rounded-full hover:cursor-pointer active:bg-red-700 duration-300 transition-colors ease-in-out`}
+            className={`${
+              isDragging ? "absolute" : ""
+            } h-2 w-2 lg:h-3 lg:w-3 hover:h-3 hover:w-3 lg:hover:h-4 lg:hover:w-4 active:bg-blue-500 translate-x-[50%] rounded-full hover:cursor-pointer bg-red-700 duration-300 transition-colors ease-in-out`}
             onMouseDown={drag}
             onTouchStart={touchDrag}
           ></div>
