@@ -11,6 +11,7 @@ import {
 } from "@/components/ui/alert-dialog";
 
 const RoomDelete = () => {
+  const 
   return (
     <AlertDialog>
       <AlertDialogTrigger>

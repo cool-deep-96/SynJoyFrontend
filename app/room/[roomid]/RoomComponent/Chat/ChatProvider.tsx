@@ -21,7 +21,7 @@ export interface Message {
   sentById: string;
   sentByUserName: string;
   text: string;
-  time: number;
+  time: string;
   isRemoved: boolean;
 }
 
@@ -164,7 +164,6 @@ const ChatProvider = ({ children }: ChatProviderProps) => {
     const handleSyncChat = (data: Message) => {
       console.log(data);
       setMessages((prev) => {
-        
         if (data.isRemoved) {
           // If the message is marked as removed, filter it out from the list
           return prev.filter((msg) => msg.id !== data.id);

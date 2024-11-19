@@ -1,4 +1,4 @@
-import { CircleUser, Triangle } from "lucide-react";
+import { CircleUser, Triangle, TriangleIcon } from "lucide-react";
 import React, { useState } from "react";
 import RemoveUser from "../alert_dialog/RemoveUser";
 import { useMember } from "./MemberProvider";
@@ -9,10 +9,13 @@ const MembersList = () => {
   const { joinedMembers, removeMember, requestedMembers, acceptMember } =
     useMember();
   const [openSection, setOpenSection] = useState<"joined" | "requests">(
-    (tokenData?.isOwner && requestedMembers.length) ? "requests" : "joined"
+    tokenData?.isOwner && requestedMembers.length ? "requests" : "joined"
   );
 
   const handleToggle = (section: "joined" | "requests") => {
+    if (openSection === section && section === "requests") {
+      setOpenSection("joined");
+    }
     if (openSection !== section) {
       setOpenSection(section); // Only change the section if a different section is clicked
     }
@@ -27,7 +30,9 @@ const MembersList = () => {
             onClick={() => handleToggle("requests")}
             className="cursor-pointer text-sm lg:text-base rounded-lg border border-gray-800 px-5 py-2 flex justify-between items-center"
           >
-            <p className="text-green-500 font-semibold">requests +{requestedMembers.length}</p>
+            <p className="text-green-500 font-semibold">
+              requests +{requestedMembers.length}
+            </p>
             <Triangle
               className={`transition-transform duration-300 ${
                 openSection === "requests" && "rotate-180"
@@ -35,7 +40,7 @@ const MembersList = () => {
             />
           </div>
           <div
-            className={`overflow-y-scroll transition-all duration-500 ease-in-out ${
+            className={`overflow-y-scroll scrollable-div transition-all duration-500 ease-in-out ${
               openSection === "requests"
                 ? "h-[60vh] opacity-100 "
                 : "max-h-0 opacity-0"
@@ -50,6 +55,7 @@ const MembersList = () => {
                   <p className="flex gap-5 items-center">
                     <CircleUser />
                     {requestedMember.userName}
+                    {tokenData.id === requestedMember.id && "(You)"}
                   </p>
                   <div className="flex lg:gap-5 gap-2 text-xs lg:text-base">
                     <button
@@ -88,15 +94,17 @@ const MembersList = () => {
           onClick={() => handleToggle("joined")}
           className="cursor-pointer rounded-lg text-sm lg:text-base md:text-base border border-gray-800 px-5 py-2 flex justify-between items-center"
         >
-          <p className="text-green-500 font-semibold">joined +{joinedMembers.length-1}</p>
-          <Triangle
+          <p className="text-green-500 font-semibold">
+            joined +{joinedMembers.length - 1}
+          </p>
+          <TriangleIcon
             className={`transition-transform duration-300 ${
               openSection === "joined" && "rotate-180"
             }`}
           />
         </div>
         <div
-          className={`overflow-y-scroll transition-all duration-500 ease-in-out  ${
+          className={`overflow-y-scroll scrollable-div transition-all duration-500 ease-in-out  ${
             openSection === "joined"
               ? "h-[60vh] opacity-100 "
               : "max-h-0 opacity-0"
@@ -111,6 +119,7 @@ const MembersList = () => {
                 <p className="flex lg:gap-5 gap-3 items-center text-sm lg:text-base">
                   <CircleUser />
                   {joinedMember.userName}
+                  {tokenData?.id === joinedMember.id && " (You)"}
                 </p>
                 {tokenData?.isOwner && tokenData.id != joinedMember.id && (
                   <RemoveUser member={joinedMember} />

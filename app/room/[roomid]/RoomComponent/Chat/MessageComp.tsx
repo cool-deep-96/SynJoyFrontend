@@ -1,12 +1,8 @@
-import {
-  CheckIcon,
-  CircleUserRound,
-  Edit,
-  Trash,
-} from "lucide-react";
+import { CheckIcon, CircleUserRound, Edit, Trash } from "lucide-react";
 import { Message, useChat } from "./ChatProvider";
 import { useEffect, useRef, useState } from "react";
 import { Cross1Icon } from "@radix-ui/react-icons";
+import { formatAMPM } from "@/utils/utils";
 
 interface MessageProps {
   message: Message;
@@ -18,7 +14,7 @@ const MessageComp = ({ message }: MessageProps) => {
       <CircleUserRound className="w-4 h-6 lg:w-6 lg:h-6" />
       <div className="relative bg-[#6A6767] lg:p-2 p-1 rounded-lg ">
         <p className="absolute lg:text-xs text-[0.60rem] font-medium right-1 bottom-1 lg:right-2 lg:bottom-2 opacity-60">
-          {message.time}
+          {formatAMPM(message.time)}
         </p>
         <p className="text-[#FA5F05] text-sm">{message.sentByUserName}</p>
         <p className="text-white pb-4 text-sm lg:text-base">{message.text}</p>
@@ -86,8 +82,8 @@ const SelfMessage = ({ message }: SelfMessageProps) => {
         onClick={togglePopup}
       >
         {/* Display time and message */}
-        <p className="absolute text-xs font-medium right-1 bottom-1 lg:right-2 lg:bottom-2 opacity-60">
-          {message.time}
+        <p className="absolute text-xs font-light right-1 bottom-1 lg:right-2 lg:bottom-2 opacity-60">
+          {formatAMPM(message.time)}
         </p>
 
         {/* If editing, show input box for editing */}

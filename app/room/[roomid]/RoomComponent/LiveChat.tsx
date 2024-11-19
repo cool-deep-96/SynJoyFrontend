@@ -9,7 +9,7 @@ const LiveChat = () => {
     <div className="flex h-full flex-col justify-between text-sm lg:text-base">
       <Info />
       <LiveChatHead />
-      <div className="flex-grow overflow-y-auto ">
+      <div className="flex-grow overflow-y-auto scrollable-div">
         <ChatProvider>
           <ChatBox />
         </ChatProvider>

@@ -10,7 +10,7 @@ import {
 import ProgressBar from "./ProgressBar";
 import SettingDrawer from "./SettingDrawer";
 import { useSocketUser } from "../../SocketContextProvider/SocketContext";
-import VideoLoader from "@/app/Component/Skeleton/VideoLoader";
+import VideoLoader from "@/components/common/Skeleton/VideoLoader";
 
 const Controller = () => {
   const controlsRef = useRef<HTMLDivElement | null>(null);
@@ -27,7 +27,7 @@ const Controller = () => {
     isBuffering,
     source,
     emitVideoSyncToServer,
-    url
+    url,
   } = useVideo();
   const { openChat, setOpenChat, tokenData } = useSocketUser()!;
 
@@ -46,13 +46,25 @@ const Controller = () => {
       if (isRightSide) {
         // Skip forward 10 seconds
         const newTime = Math.min(videoElement.currentTime + skipTime, duration);
-        videoElement.currentTime = newTime;
-        setCurrentTime(newTime);
+        const payload: SycVideoPayload = {
+          currentTime: newTime,
+          isPlaying: false,
+          source,
+          tokenData,
+          url,
+        };
+        emitVideoSyncToServer(payload);
       } else {
         // Skip backward 10 seconds
         const newTime = Math.max(videoElement.currentTime - skipTime, 0);
-        videoElement.currentTime = newTime;
-        setCurrentTime(newTime);
+        const payload: SycVideoPayload = {
+          currentTime: newTime,
+          isPlaying: false,
+          source,
+          tokenData,
+          url,
+        };
+        emitVideoSyncToServer(payload);
       }
     }
   };
@@ -72,7 +84,7 @@ const Controller = () => {
       isPlaying: !isPlaying,
       source,
       tokenData,
-      url
+      url,
     };
     emitVideoSyncToServer(payload);
   };
@@ -107,12 +119,12 @@ const Controller = () => {
 
         {
           <div
-            className="absolute top-[50%] -translate-y-1/2 right-0 my-4 px-5  md:flex cursor-pointer"
+            className="absolute bottom-0  right-0 my-4 px-5  md:flex cursor-pointer"
             onClick={() => setOpenChat((prev) => !prev)}
           >
             <div className="relative">
               <BellDot className="absolute left-[75%] w-3 p-[1px] h-3 bg-red-600 rounded-full " />
-              <LucideMessageSquareText />
+              <LucideMessageSquareText className="text-green-300  md:w-8 h-auto" />
             </div>
           </div>
         }

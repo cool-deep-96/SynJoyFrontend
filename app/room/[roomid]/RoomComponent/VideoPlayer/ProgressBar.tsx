@@ -19,8 +19,9 @@ const ProgressBar = () => {
   const [isDragging, setIsDragging] = useState<boolean>(false);
   const thumbRef = useRef<HTMLDivElement | null>(null);
 
-  const { currentTime, duration, source, emitVideoSyncToServer, url } = useVideo();
-  const {tokenData} = useSocketUser()
+  const { currentTime, duration, source, emitVideoSyncToServer, url } =
+    useVideo();
+  const { tokenData } = useSocketUser();
 
   // Update progress bar width when currentTime or duration changes
   useEffect(() => {
@@ -52,7 +53,7 @@ const ProgressBar = () => {
         isPlaying: false,
         source,
         tokenData,
-        url
+        url,
       };
       emitVideoSyncToServer(payload);
     }
@@ -92,7 +93,7 @@ const ProgressBar = () => {
         isPlaying: false,
         source,
         tokenData,
-        url
+        url,
       };
       emitVideoSyncToServer(payload);
       setIsDragging(false);
@@ -117,7 +118,7 @@ const ProgressBar = () => {
         isPlaying: false,
         source,
         tokenData,
-        url
+        url,
       };
       emitVideoSyncToServer(payload); // Finalize seek time
       setIsDragging(false);

@@ -1,12 +1,12 @@
-import React from 'react'
-import UrlInputPage from './UrlInputPage'
+import React from "react";
+import UrlInputPage from "./UrlInputPage";
 
 const SettingPage = () => {
   return (
     <div>
-        <UrlInputPage/>
+      <UrlInputPage />
     </div>
-  )
-}
+  );
+};
 
-export default SettingPage
+export default SettingPage;

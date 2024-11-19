@@ -1,8 +1,5 @@
 import React, {
   createContext,
-  Dispatch,
-  ReactNode,
-  SetStateAction,
   useCallback,
   useContext,
   useEffect,
@@ -13,7 +10,8 @@ import { useSocketUser } from "../../SocketContextProvider/SocketContext";
 import { membersEndPoints } from "@/app/ApiHandler/api_list";
 import apiCall from "@/app/ApiHandler/api_call";
 import toast from "react-hot-toast";
-import { SOCKET_CHANNEL } from "@/interfaces/socket_channels";
+import { SOCKET_CHANNEL } from "@/interfaces/socket_channels"; // Assuming this is the path
+import showJoinRequestToast from "../alert_dialog/ShowJoinRequests";
 
 export interface Member {
   id: string;
@@ -27,75 +25,69 @@ interface MemberContextType {
   joinedMembers: Member[];
   requestedMembers: Member[];
   newRequests: Member[];
-  setNewRequests: Dispatch<SetStateAction<Member[]>>;
+  setNewRequests: React.Dispatch<React.SetStateAction<Member[]>>;
   acceptMember: (id: string, userName: string) => void;
   removeMember: (id: string, userName: string) => void;
 }
 
-interface MemberProviderProps {
-  children: ReactNode;
-}
-
 const MemberContext = createContext<MemberContextType | undefined>(undefined);
 
-const MemberProvider = ({ children }: MemberProviderProps) => {
+const MemberProvider = ({ children }: { children: React.ReactNode }) => {
   const [joinedMembers, setJoinedMembers] = useState<Member[]>([]);
   const [requestedMembers, setRequestedMembers] = useState<Member[]>([]);
   const [newRequests, setNewRequests] = useState<Member[]>([]);
+  const [isSilent, setIsSilent] = useState<boolean>(true);
 
   const { socket, tokenData, token } = useSocketUser()!;
 
-  // Memoize headers to avoid unnecessary recalculations
   const headers = useMemo(
-    () => ({
-      Authorization: `Bearer ${token}`,
-    }),
+    () => ({ Authorization: `Bearer ${token}` }),
     [token]
   );
 
+  // Get all members (joined and requested)
   const getAllMembers = useCallback(async () => {
+    if (!tokenData?.roomId) return;
     try {
-      if (!tokenData?.roomId) return;
-      const url = membersEndPoints.GET_USER;
-      const method = "GET";
-      const data = { roomId: tokenData.roomId };
-
-      const response = await apiCall(method, url, data, headers);
-      const { joinedMembers, requestedMembers } = response.payload;
-
-      setJoinedMembers(joinedMembers);
-      setRequestedMembers(requestedMembers);
+      const { payload } = await apiCall(
+        "GET",
+        `${membersEndPoints.GET_USER}/${tokenData.roomId}/members`,
+        null,
+        headers
+      );
+      setJoinedMembers(payload.joinedMembers);
+      setRequestedMembers(payload.requestedMembers);
     } catch (error) {
+      console.log(tokenData.roomId);
       toast.error((error as Error).message);
     }
-  }, [headers, tokenData]);
+  }, [headers, tokenData?.roomId]);
 
   const acceptMember = useCallback(
     async (id: string, userName: string) => {
       try {
-        const url = membersEndPoints.ADMIT_ROOM;
-        const method = "PUT";
-        const data = { userId: id, userName };
+        const { message } = await apiCall(
+          "PUT",
+          membersEndPoints.ADMIT_ROOM,
+          { userId: id, userName },
+          headers
+        );
+        toast.success(message);
 
-        const response = await apiCall(method, url, data, headers);
-        toast.success(response.message);
-
-        // Update member lists
+        // Move the member from requested to joined
         setRequestedMembers((prev) =>
           prev.filter((member) => member.id !== id)
         );
-        setJoinedMembers((prev) =>
-          [
-            ...prev,
-            {
-              id,
-              userName,
-              roomId: tokenData!.roomId,
-              isMember: true,
-              isOwner: false,
-            },
-          ].filter((v, i, a) => a.findIndex((t) => t.id === v.id) === i)
-        );
+        setJoinedMembers((prev) => [
+          ...prev,
+          {
+            id,
+            userName,
+            roomId: tokenData!.roomId,
+            isMember: true,
+            isOwner: false,
+          },
+        ]);
       } catch (error) {
         toast.error((error as Error).message);
       }
@@ -106,14 +98,15 @@ const MemberProvider = ({ children }: MemberProviderProps) => {
   const removeMember = useCallback(
     async (id: string, userName: string) => {
       try {
-        const url = membersEndPoints.REMOVE_USER;
-        const method = "PUT";
-        const data = { userId: id, userName };
+        const { message } = await apiCall(
+          "PUT",
+          membersEndPoints.REMOVE_USER,
+          { userId: id, userName },
+          headers
+        );
+        toast.success(message);
 
-        const response = await apiCall(method, url, data, headers);
-        toast.success(response.message);
-
-        // Remove from both joinedMembers and requestedMembers
+        // Remove from both joined and requested members
         setJoinedMembers((prev) => prev.filter((member) => member.id !== id));
         setRequestedMembers((prev) =>
           prev.filter((member) => member.id !== id)
@@ -125,47 +118,53 @@ const MemberProvider = ({ children }: MemberProviderProps) => {
     [headers]
   );
 
+  // Handle syncing the joined member list via socket
   useEffect(() => {
-    if (socket) {
-      const handleSyncJoined = (data: Member) => {
-        // Check if the current user is being removed
-        if (data.id === tokenData?.id && !data.isMember) {
-          console.log("You have been removed from the room");
+    if (!socket) return;
 
-          // Clear local storage
-          localStorage.clear();
+    const handleSyncJoined = (data: Member) => {
+      // If the current user is removed
+      if (data.id === tokenData?.id && !data.isMember) {
+        localStorage.clear();
+        window.location.replace("/room/removed");
+        return;
+      }
 
-          // Redirect to a "removed" page (using window.location or React Router)
-          window.location.replace("/room/removed"); // Replace '/removed-page' with the actual URL
-          return; // Exit early to avoid further state updates
-        }
+      setJoinedMembers((prev) =>
+        data.isMember
+          ? [...prev, data].filter(
+              (member, index, self) =>
+                self.findIndex((m) => m.id === member.id) === index
+            )
+          : prev.filter((member) => member.id !== data.id)
+      );
+    };
 
-        setJoinedMembers((prev) =>
-          data.isMember
-            ? [...prev, data].filter(
-                (v, i, a) => a.findIndex((t) => t.id === v.id) === i
-              ) // Ensure no duplicates
-            : prev.filter((member) => member.id !== data.id)
-        );
-      };
+    socket.on(SOCKET_CHANNEL.SYNC_JOINED_LIST, handleSyncJoined);
 
-      socket.on(SOCKET_CHANNEL.SYNC_JOINED_LIST, handleSyncJoined);
+    return () => {
+      socket.off(SOCKET_CHANNEL.SYNC_JOINED_LIST, handleSyncJoined);
+    };
+  }, [socket, tokenData]);
 
-      return () => {
-        socket.off(SOCKET_CHANNEL.SYNC_JOINED_LIST, handleSyncJoined);
-      };
-    }
-  }, [socket, setJoinedMembers, tokenData]);
-
+  // Handle join requests via socket
   useEffect(() => {
     if (socket && tokenData?.isOwner) {
       const handleJoinRequest = (data: Member) => {
-        setNewRequests((prev) =>
-          prev.some((req) => req.id === data.id) ? prev : [data, ...prev]
-        );
-        setRequestedMembers((prev) =>
-          prev.some((req) => req.id === data.id) ? prev : [data, ...prev]
-        );
+        // Append to newRequests only if the member is not already in the list
+        setNewRequests((prev) => {
+          const isNewRequest = !prev.some((req) => req.id === data.id);
+          if (isNewRequest) {
+            isSilent && showJoinRequestToast(data, acceptMember, removeMember);
+            return [data, ...prev];
+          }
+          return prev;
+        });
+
+        setRequestedMembers((prev) => {
+          const isNewMember = !prev.some((req) => req.id === data.id);
+          return isNewMember ? [data, ...prev] : prev;
+        });
       };
 
       socket.on(SOCKET_CHANNEL.JOIN_REQUEST_CHANNEL, handleJoinRequest);
@@ -174,7 +173,7 @@ const MemberProvider = ({ children }: MemberProviderProps) => {
         socket.off(SOCKET_CHANNEL.JOIN_REQUEST_CHANNEL, handleJoinRequest);
       };
     }
-  }, [socket, tokenData]);
+  }, [socket, tokenData, acceptMember, removeMember, isSilent]);
 
   useEffect(() => {
     getAllMembers();
@@ -198,10 +197,10 @@ const MemberProvider = ({ children }: MemberProviderProps) => {
 
 export default MemberProvider;
 
-// Hook to use the MemberContext in functional components
+// Hook to use the MemberContext
 export const useMember = (): MemberContextType => {
   const context = useContext(MemberContext);
-  if (context === undefined) {
+  if (!context) {
     throw new Error("useMember must be used within a MemberProvider");
   }
   return context;

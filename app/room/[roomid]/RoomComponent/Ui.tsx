@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useCallback } from "react";
 import LiveChat from "./LiveChat";
 import VideoPlayer from "./VideoPlayer/VideoPlayer";
 import { VideoProvider } from "./VideoPlayer/VideoPlayerContext";
@@ -46,7 +46,7 @@ export const Ui = () => {
   };
 
   // Handle resizing movement for both mouse and touch
-  const handleResizeMove = (e: any) => {
+  const handleResizeMove = useCallback((e: any) => {
     if (!isResizing || !resizableRef.current) return;
     const resizableRect = resizableRef.current.getBoundingClientRect();
     let clientX: number, clientY: number;
@@ -75,7 +75,7 @@ export const Ui = () => {
         newChatHeight > 5 ? (newChatHeight < 95 ? newChatHeight : 95) : 5
       ); // Limit to 5% - 95%
     }
-  };
+  },[direction, isResizing]);
 
   // Stop resizing for both mouse and touch
   const handleEndResize = () => {
@@ -95,7 +95,7 @@ export const Ui = () => {
       window.removeEventListener("touchmove", handleResizeMove);
       window.removeEventListener("touchend", handleEndResize);
     };
-  }, [isResizing, direction]);
+  }, [isResizing, direction, handleResizeMove]);
 
   return (
     <div className="flex flex-col h-screen w-full">

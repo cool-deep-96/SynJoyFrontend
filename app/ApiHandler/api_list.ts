@@ -16,7 +16,7 @@ export const tokenEndPoints = {
 export const membersEndPoints={
     ADMIT_ROOM: SERVER_URL+'/api/room/accept',
     REMOVE_USER: SERVER_URL+'/api/room/reject',
-    GET_USER: SERVER_URL+'/api/room/members',
+    GET_USER: SERVER_URL+'/api/room',
 }
 
 export const chatEndPoints = {

@@ -12,7 +12,7 @@ const YoutubePlayer = () => {
     setCurrentTime,
     setIsBuffering,
     setIsPlaying,
-    isMuted
+    isMuted,
   } = useVideo();
   const [videoId, setVideoId] = useState<string>("");
   const currentTimeIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -40,7 +40,7 @@ const YoutubePlayer = () => {
     if (player.current) {
       const duration = await player.current.getDuration();
       if (duration) setDuration(duration);
-      setIsBuffering(false)
+      setIsBuffering(false);
     }
   }, [player, setDuration]);
 
@@ -88,8 +88,8 @@ const YoutubePlayer = () => {
         } else if (event.id === 0) {
           stopUpdatingCurrentTime();
           setIsPlaying(false);
-        } else if(event.id === 3) {
-          setIsBuffering(true)
+        } else if (event.id === 3) {
+          setIsBuffering(true);
         }
       });
       return () => {
@@ -109,7 +109,6 @@ const YoutubePlayer = () => {
   useEffect(() => {
     if (url) handleYouTubeUrl(url);
   }, [url, handleYouTubeUrl]);
-
 
   return <div className="hidden"></div>;
 };
