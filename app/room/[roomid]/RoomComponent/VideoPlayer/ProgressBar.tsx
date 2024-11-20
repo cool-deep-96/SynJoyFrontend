@@ -40,7 +40,7 @@ const ProgressBar = () => {
 
   // Handle the progress bar seeking logic on click
   const handleClick = (e: MouseEvent<HTMLDivElement>) => {
-    if (progressBarRef.current && progressBeforeRef.current) {
+    if (source && progressBarRef.current && progressBeforeRef.current) {
       const rect = progressBarRef.current.getBoundingClientRect();
       const clickX = e.clientX - rect.left;
       const progressBarWidth = rect.width;
@@ -72,7 +72,7 @@ const ProgressBar = () => {
       thumbRef.current.style.left = `${thumbPosition}px`;
 
       // Update both the state and the ref with the latest seeking time
-      const newSeekingTime = fraction * duration;
+      const newSeekingTime = Math.min(duration, fraction * duration);
       setSeekTime(newSeekingTime);
       seekingTimeRef.current = newSeekingTime;
     }
@@ -139,7 +139,7 @@ const ProgressBar = () => {
       const hoverFraction = Math.min(Math.max(hoverX / progressBarWidth, 0), 1); // Ensure it's between 0 and 1
 
       // Calculate hover time and set it in state
-      setSeekTime(hoverFraction * duration);
+      setSeekTime(Math.min(duration, hoverFraction * duration));
       setShowSeekTime(true);
     }
   };

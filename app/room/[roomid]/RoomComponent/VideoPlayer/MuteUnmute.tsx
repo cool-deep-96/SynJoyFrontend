@@ -1,19 +1,19 @@
 import React, { useCallback, useEffect } from "react";
 import { useVideo } from "./VideoPlayerContext";
-import { Volume, Volume2, VolumeOff } from "lucide-react";
+import { Volume2, VolumeOff } from "lucide-react";
 
 const MuteUnmute = () => {
-  const { isMuted, player, setIsMuted, url } = useVideo();
+  const { isMuted, player, setIsMuted, playerCreating } = useVideo();
 
   const handleMuteUnMute = useCallback(async () => {
     setIsMuted((prev) => !prev);
   }, [setIsMuted]);
 
   useEffect(() => {
-    if (player.current) {
+    if (!playerCreating && player.current) {
       isMuted ? player.current.mute() : player.current.unMute();
     }
-  }, [player, isMuted, url]);
+  }, [playerCreating, player, isMuted]);
 
   return (
     <div className="hover:cursor-pointer " onClick={handleMuteUnMute}>

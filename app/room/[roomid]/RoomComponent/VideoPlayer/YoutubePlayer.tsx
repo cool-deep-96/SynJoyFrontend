@@ -12,20 +12,25 @@ const YoutubePlayer = () => {
     setCurrentTime,
     setIsBuffering,
     setIsPlaying,
-    isMuted,
+    setPlayerCreating,
   } = useVideo();
   const [videoId, setVideoId] = useState<string>("");
   const currentTimeIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Extracts the video ID from the URL using regex and updates state
-  const handleYouTubeUrl = useCallback(
-    (url: string) => {
-      const regex =
-        /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/|y\/|\/v\/|\/e\/|watch\?v=|&v=|watch\?.+&v=|&v=|\/vi?\/)([^"&?\/\s]{11})/;
-      const match = url?.match(regex);
+  // Helper to extract video ID from the URL
+  const extractVideoId = (url: string) => {
+    const regex =
+      /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/|y\/|\/v\/|\/e\/|watch\?v=|&v=|watch\?.+&v=|&v=|\/vi?\/)([^"&?\/\s]{11})/;
+    const match = url?.match(regex);
+    return match ? match[1] : null;
+  };
 
-      if (match) {
-        setVideoId(match[1]);
+  // Handle URL changes and validate YouTube URL
+  const handleYouTubeUrl = useCallback(
+    (newUrl: string) => {
+      const id = extractVideoId(newUrl);
+      if (id) {
+        setVideoId(id);
       } else {
         toast.error("Invalid YouTube URL");
         setVideoId("");
@@ -41,23 +46,25 @@ const YoutubePlayer = () => {
       const duration = await player.current.getDuration();
       if (duration) setDuration(duration);
       setIsBuffering(false);
+      setPlayerCreating(false);
     }
-  }, [player, setDuration]);
+  }, [player, setDuration, setIsBuffering, setPlayerCreating]);
 
+  // Updates the current playback time
   const updateCurrentTime = useCallback(async () => {
     if (player.current) {
       const currentTime = await player.current.getCurrentTime();
       setCurrentTime(currentTime);
-      setIsBuffering(false);
     }
   }, [player, setCurrentTime]);
 
-  // Start updating the current time at regular intervals
+  // Start/Stop updating current time
   const startUpdatingCurrentTime = useCallback(() => {
-    currentTimeIntervalRef.current = setInterval(updateCurrentTime, 1000); // update every second
+    if (!currentTimeIntervalRef.current) {
+      currentTimeIntervalRef.current = setInterval(updateCurrentTime, 1000);
+    }
   }, [updateCurrentTime]);
 
-  // Stop updating the current time
   const stopUpdatingCurrentTime = useCallback(() => {
     if (currentTimeIntervalRef.current) {
       clearInterval(currentTimeIntervalRef.current);
@@ -65,50 +72,71 @@ const YoutubePlayer = () => {
     }
   }, []);
 
-  // Effect to initialize or update the YouTube player when videoId changes
-  useEffect(() => {
+  // Initialize the YouTube player
+  const initializePlayer = useCallback(() => {
     if (videoId) {
-      if (player.current) {
-        player.current?.destroy(); // Clean up previous player instance if it exists
-      }
-
       player.current = YouTubePlayer("youtubePlayer", {
         videoId,
-        playerVars: {
-          controls: 0,
-        },
+        playerVars: { controls: 0 },
       });
 
-      player.current?.on("ready", updateDuration); // Use event listener to update metadata// Store the YouTube player instance
-      player.current?.on("stateChange", (event: any) => {
-        if (event.data === 1) {
-          startUpdatingCurrentTime();
-        } else if (event.data === 2) {
-          stopUpdatingCurrentTime(); // Stop updating when video is paused or ended
-        } else if (event.id === 0) {
-          stopUpdatingCurrentTime();
-          setIsPlaying(false);
-        } else if (event.id === 3) {
-          setIsBuffering(true);
+      player.current.on("ready", updateDuration);
+      player.current.on("stateChange", (event: any) => {
+        switch (event.data) {
+          case 1: // Playing
+            startUpdatingCurrentTime();
+            setIsPlaying(true);
+            setIsBuffering(false);
+            break;
+          case 2: // Paused
+            stopUpdatingCurrentTime();
+            setIsPlaying(false);
+            setIsBuffering(false);
+            break;
+          case 0: // Ended
+            stopUpdatingCurrentTime();
+            setIsPlaying(false);
+            setIsBuffering(false);
+            break;
+          case 3: // Buffering
+            setIsBuffering(true);
+            break;
+          default:
+            break;
         }
       });
-      return () => {
-        if (player.current) player.current?.destroy(); // Clean up player on component unmount
-      };
     }
   }, [
     videoId,
     player,
     updateDuration,
-    updateCurrentTime,
     startUpdatingCurrentTime,
     stopUpdatingCurrentTime,
+    setIsPlaying,
+    setIsBuffering,
   ]);
 
-  // Effect to handle the URL change
+  // Effect: Handle URL changes
   useEffect(() => {
-    if (url) handleYouTubeUrl(url);
+    if (url) {
+      handleYouTubeUrl(url);
+    }
   }, [url, handleYouTubeUrl]);
+
+  // Effect: Initialize player when videoId changes
+  useEffect(() => {
+    setPlayerCreating(true);
+    initializePlayer();
+    console.log("initialized again");
+
+    return () => {
+      stopUpdatingCurrentTime();
+      if (player.current) {
+        player.current.destroy();
+        console.log(player.current); // Cleanup on unmount
+      }
+    };
+  }, [initializePlayer, stopUpdatingCurrentTime, player, setPlayerCreating]);
 
   return <div className="hidden"></div>;
 };

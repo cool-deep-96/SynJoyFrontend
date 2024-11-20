@@ -3,8 +3,6 @@
 import { useState } from "react";
 import CreateUserDialog from "./components/CreateUserDialog";
 import { generateRoomId } from "@/utils/utils";
-import { roomEndPoints } from "../ApiHandler/api_list";
-import apiCall from "../ApiHandler/api_call";
 import toast from "react-hot-toast";
 import { useRouter } from "next/navigation";
 

@@ -4,7 +4,7 @@ import { Source } from "@/interfaces/interfaces";
 import YoutubePlayer from "./YoutubePlayer";
 
 const VideoPlayer = () => {
-  const { videoRef, url, source, player, isMuted } = useVideo();
+  const { videoRef, url, source, player, isMuted, playerCreating } = useVideo();
 
   return (
     <div className="relative flex justify-center items-center h-full w-full ">
@@ -19,7 +19,7 @@ const VideoPlayer = () => {
           style={{ pointerEvents: "none" }}
         ></div>
       </div>
-      {source === Source.FILE ? (
+      {source && source === Source.FILE ? (
         <video
           ref={videoRef}
           preload="metadata"
@@ -32,7 +32,9 @@ const VideoPlayer = () => {
       )}
 
       {/* controls */}
-      {(videoRef.current || player.current) && <Controller />}
+      {!playerCreating && (videoRef.current || player.current) && (
+        <Controller />
+      )}
       {/* controls */}
     </div>
   );

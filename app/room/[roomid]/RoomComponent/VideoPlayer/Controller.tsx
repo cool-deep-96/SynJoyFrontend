@@ -17,56 +17,56 @@ const Controller = () => {
 
   const {
     videoRef,
-    currentTime,
-    setCurrentTime,
-    duration,
-    isPlaying,
-    setIsPlaying,
-    title,
     player,
-    isBuffering,
+    duration,
     source,
+    isPlaying,
+    currentTime,
+    title,
+    isBuffering,
     emitVideoSyncToServer,
     url,
   } = useVideo();
-  const { openChat, setOpenChat, tokenData } = useSocketUser()!;
+  const { setOpenChat, tokenData } = useSocketUser()!;
 
-  const handleDoubleClick = (event: React.MouseEvent<HTMLDivElement>) => {
+  const handleDoubleClick = async (event: React.MouseEvent<HTMLDivElement>) => {
+    if (!controlsRef.current || !(videoRef.current || player.current)) return;
+
     const controlsElement = controlsRef.current;
     const videoElement = videoRef.current;
 
-    if (controlsElement && videoElement) {
-      const boundingRect = controlsElement.getBoundingClientRect();
-      const clickX = event.clientX;
+    const boundingRect = controlsElement.getBoundingClientRect();
+    const clickX = event.clientX;
 
-      // Check if the click is on the left or right half
-      const isRightSide = clickX > boundingRect.left + boundingRect.width / 2;
-      const skipTime = 10; // seconds
+    // Check if the click is on the right side
+    const isRightSide = clickX > boundingRect.left + boundingRect.width / 2;
+    const skipTime = isRightSide ? 10 : -10; // Skip forward or backward by 10 seconds
+    let newTime = 0;
 
-      if (isRightSide) {
-        // Skip forward 10 seconds
-        const newTime = Math.min(videoElement.currentTime + skipTime, duration);
-        const payload: SycVideoPayload = {
-          currentTime: newTime,
-          isPlaying: false,
-          source,
-          tokenData,
-          url,
-        };
-        emitVideoSyncToServer(payload);
-      } else {
-        // Skip backward 10 seconds
-        const newTime = Math.max(videoElement.currentTime - skipTime, 0);
-        const payload: SycVideoPayload = {
-          currentTime: newTime,
-          isPlaying: false,
-          source,
-          tokenData,
-          url,
-        };
-        emitVideoSyncToServer(payload);
-      }
+    // Determine the new time based on the active video element or YouTube player
+    if (videoElement) {
+      newTime = Math.max(
+        0,
+        Math.min(videoElement.currentTime + skipTime, duration)
+      );
+      videoElement.currentTime = newTime; // Update the video element time
+    } else if (player.current) {
+      const currentTime = await player.current.getCurrentTime();
+      newTime = Math.max(0, Math.min(currentTime + skipTime, duration));
+      await player.current.seekTo(newTime, true); // Update the YouTube player time
     }
+
+    // Prepare the payload
+    const payload: SycVideoPayload = {
+      currentTime: newTime,
+      isPlaying: false,
+      source,
+      tokenData,
+      url,
+    };
+
+    // Emit sync event
+    emitVideoSyncToServer(payload);
   };
 
   useEffect(() => {

@@ -35,6 +35,7 @@ export interface VideoContextType {
   isMuted: boolean;
   isFullScreen: boolean;
   isBuffering: boolean;
+  playerCreating: boolean;
   player: MutableRefObject<YouTubePlayer | undefined>;
   setSource: Dispatch<SetStateAction<Source>>;
   setUrl: Dispatch<SetStateAction<string>>;
@@ -45,6 +46,7 @@ export interface VideoContextType {
   setIsMuted: Dispatch<SetStateAction<boolean>>;
   setIsFullScreen: Dispatch<SetStateAction<boolean>>;
   setIsBuffering: Dispatch<SetStateAction<boolean>>;
+  setPlayerCreating: Dispatch<SetStateAction<boolean>>;
   emitVideoSyncToServer: (payload: SycVideoPayload) => void;
 }
 
@@ -57,15 +59,18 @@ interface VideoProviderProps {
 
 export const VideoProvider: React.FC<VideoProviderProps> = ({ children }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [source, setSource] = useState<Source>(Source.FILE);
+  const [source, setSource] = useState<Source>(Source.YOUTUBE);
   const [title, setTitle] = useState<string>("");
-  const [url, setUrl] = useState<string>("/dev_file/Godzilla.mp4");
+  const [url, setUrl] = useState<string>(
+    "https://youtu.be/llAYUWXV7CI?si=12S6muEs9rd3kxyY"
+  );
   const [duration, setDuration] = useState<number>(0);
   const [currentTime, setCurrentTime] = useState<number>(0);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
   const [isMuted, setIsMuted] = useState<boolean>(true);
   const [isFullScreen, setIsFullScreen] = useState<boolean>(false);
   const [isBuffering, setIsBuffering] = useState<boolean>(false);
+  const [playerCreating, setPlayerCreating] = useState<boolean>(false);
   const player = useRef<YouTubePlayer>();
   const { socket } = useSocketUser();
 
@@ -122,11 +127,13 @@ export const VideoProvider: React.FC<VideoProviderProps> = ({ children }) => {
         (payload: SycVideoPayload) => {
           if (payload.source === Source.FILE && videoRef.current) {
             setSource(payload.source);
+            setCurrentTime(payload.currentTime);
             videoRef.current.currentTime = payload.currentTime;
             setIsPlaying(payload.isPlaying);
           } else if (payload.source === Source.YOUTUBE && payload.url) {
             setSource(payload.source);
             setUrl(payload.url);
+            setCurrentTime(payload.currentTime);
             if (player.current) {
               player.current.seekTo(payload.currentTime, true);
               setIsPlaying(payload.isPlaying);
@@ -136,7 +143,7 @@ export const VideoProvider: React.FC<VideoProviderProps> = ({ children }) => {
         }
       );
     }
-  }, []);
+  }, [socket]);
 
   return (
     <VideoContext.Provider
@@ -152,6 +159,7 @@ export const VideoProvider: React.FC<VideoProviderProps> = ({ children }) => {
         isFullScreen,
         player,
         isBuffering,
+        playerCreating,
         setSource,
         setUrl,
         setTitle,
@@ -162,6 +170,7 @@ export const VideoProvider: React.FC<VideoProviderProps> = ({ children }) => {
         setIsFullScreen,
         setIsBuffering,
         emitVideoSyncToServer,
+        setPlayerCreating,
       }}
     >
       {children}
