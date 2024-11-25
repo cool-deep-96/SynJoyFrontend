@@ -35,8 +35,8 @@ export const Ui = () => {
     if (direction === "horizontal") {
       openChat ? setChatWidth(30) : setChatWidth(0);
     }
-    if (direction === 'vertical') {
-      openChat? setChatWidth(70) : setChatWidth(0)
+    if (direction === "vertical") {
+      openChat ? setChatWidth(70) : setChatWidth(0);
     }
   }, [openChat, direction]);
 
@@ -46,36 +46,39 @@ export const Ui = () => {
   };
 
   // Handle resizing movement for both mouse and touch
-  const handleResizeMove = useCallback((e: any) => {
-    if (!isResizing || !resizableRef.current) return;
-    const resizableRect = resizableRef.current.getBoundingClientRect();
-    let clientX: number, clientY: number;
+  const handleResizeMove = useCallback(
+    (e: any) => {
+      if (!isResizing || !resizableRef.current) return;
+      const resizableRect = resizableRef.current.getBoundingClientRect();
+      let clientX: number, clientY: number;
 
-    // Extract touch or mouse positions
-    if (e instanceof MouseEvent) {
-      clientX = e.clientX;
-      clientY = e.clientY;
-    } else {
-      clientX = e.touches[0].clientX;
-      clientY = e.touches[0].clientY;
-    }
+      // Extract touch or mouse positions
+      if (e instanceof MouseEvent) {
+        clientX = e.clientX;
+        clientY = e.clientY;
+      } else {
+        clientX = e.touches[0].clientX;
+        clientY = e.touches[0].clientY;
+      }
 
-    if (direction === "horizontal") {
-      // Horizontal resizing (adjust width)
-      const newChatWidth =
-        ((resizableRect.right - clientX) / window.innerWidth) * 100;
-      setChatWidth(
-        newChatWidth > 5 ? (newChatWidth < 95 ? newChatWidth : 95) : 5
-      ); // Limit to 5% - 95%
-    } else {
-      // Vertical resizing (adjust height)
-      const newChatHeight =
-        ((resizableRect.bottom - clientY) / window.innerHeight) * 100;
-      setChatWidth(
-        newChatHeight > 5 ? (newChatHeight < 95 ? newChatHeight : 95) : 5
-      ); // Limit to 5% - 95%
-    }
-  },[direction, isResizing]);
+      if (direction === "horizontal") {
+        // Horizontal resizing (adjust width)
+        const newChatWidth =
+          ((resizableRect.right - clientX) / window.innerWidth) * 100;
+        setChatWidth(
+          newChatWidth > 5 ? (newChatWidth < 95 ? newChatWidth : 95) : 5
+        ); // Limit to 5% - 95%
+      } else {
+        // Vertical resizing (adjust height)
+        const newChatHeight =
+          ((resizableRect.bottom - clientY) / window.innerHeight) * 100;
+        setChatWidth(
+          newChatHeight > 5 ? (newChatHeight < 95 ? newChatHeight : 95) : 5
+        ); // Limit to 5% - 95%
+      }
+    },
+    [direction, isResizing]
+  );
 
   // Stop resizing for both mouse and touch
   const handleEndResize = () => {
@@ -114,9 +117,7 @@ export const Ui = () => {
             flexBasis: `${100 - chatWidth}%`,
           }}
         >
-          <VideoProvider>
             <VideoPlayer />
-          </VideoProvider>
         </div>
 
         {/* Resizable Handle */}
@@ -138,7 +139,7 @@ export const Ui = () => {
             flexBasis: `${chatWidth}%`,
           }}
         >
-          <LiveChat />
+            <LiveChat />
         </div>
       </div>
     </div>

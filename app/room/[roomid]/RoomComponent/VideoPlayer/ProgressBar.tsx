@@ -147,7 +147,7 @@ const ProgressBar = () => {
   // Clear hover time when not hovering
 
   return (
-    <div className="flex flex-col gap-3 md:flex-col-reverse select-none">
+    <div className="flex flex-col gap-3 md:flex-col-reverse select-none ">
       {/* Current time display */}
       <div className="text-xs md:text-sm select-none flex gap-3 lg:gap-5 items-center justify-start py-1 px-2 lg:py-3">
         <p className="min-w-28">
@@ -157,7 +157,7 @@ const ProgressBar = () => {
       </div>
 
       <div
-        className="progress-area relative group/progress hover:cursor-pointer bg-gray-200 h-1 lg:h-2 rounded-full w-full"
+        className="progress-area relative group/progress hover:cursor-pointer bg-gray-200 h-1 lg:h-2 rounded-full w-full "
         ref={progressBarRef}
         onClick={handleClick}
         onMouseMove={handleHover}

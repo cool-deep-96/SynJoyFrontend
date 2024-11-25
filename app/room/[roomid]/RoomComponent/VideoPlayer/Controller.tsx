@@ -1,12 +1,6 @@
 import React, { useEffect, useRef } from "react";
 import { SycVideoPayload, useVideo } from "./VideoPlayerContext";
-import {
-  BellDot,
-  Dot,
-  LucideMessageSquareText,
-  Pause,
-  Play,
-} from "lucide-react";
+import { BellDot, LucideMessageSquareText, Pause, Play } from "lucide-react";
 import ProgressBar from "./ProgressBar";
 import SettingDrawer from "./SettingDrawer";
 import { useSocketUser } from "../../SocketContextProvider/SocketContext";

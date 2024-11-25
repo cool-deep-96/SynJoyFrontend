@@ -36,13 +36,13 @@ const Waiting: React.FC = () => {
         } else {
           toast.error(
             "Your join request was rejected. Please try again later."
-          );   
+          );
         }
       });
 
       // Cleanup the event listener on unmount
       return () => {
-        console.log("join-approve-channel cleanup called")
+        console.log("join-approve-channel cleanup called");
         socket.off("join-approve-channel");
       };
     }

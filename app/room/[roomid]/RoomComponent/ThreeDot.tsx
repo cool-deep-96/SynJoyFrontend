@@ -11,7 +11,8 @@ import { useSocketUser } from "../SocketContextProvider/SocketContext";
 const ThreeDot = () => {
   const { tokenData } = useSocketUser()!;
   const handleShare = () => {
-    const roomLink = `https://synjoy.vercel.app/room/${tokenData?.roomId}`;
+    const link = window.location.origin
+    const roomLink = `${link}/room/${tokenData?.roomId}`;
     const shareData = {
       title: "Join my room!",
       text: "Check out this awesome room!",

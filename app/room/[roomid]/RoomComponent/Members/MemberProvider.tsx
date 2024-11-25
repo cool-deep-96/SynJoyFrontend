@@ -19,6 +19,7 @@ export interface Member {
   roomId: string;
   isMember: boolean;
   isOwner: boolean;
+  isSelf?: boolean;
 }
 
 interface MemberContextType {
@@ -78,16 +79,21 @@ const MemberProvider = ({ children }: { children: React.ReactNode }) => {
         setRequestedMembers((prev) =>
           prev.filter((member) => member.id !== id)
         );
-        setJoinedMembers((prev) => [
-          ...prev,
-          {
-            id,
-            userName,
-            roomId: tokenData!.roomId,
-            isMember: true,
-            isOwner: false,
-          },
-        ]);
+        setJoinedMembers((prev) =>
+          [
+            ...prev,
+            {
+              id,
+              userName,
+              roomId: tokenData!.roomId,
+              isMember: true,
+              isOwner: false,
+            },
+          ].filter(
+            (member, index, self) =>
+              self.findIndex((m) => m.id === member.id) === index
+          )
+        );
       } catch (error) {
         toast.error((error as Error).message);
       }
@@ -126,7 +132,9 @@ const MemberProvider = ({ children }: { children: React.ReactNode }) => {
       // If the current user is removed
       if (data.id === tokenData?.id && !data.isMember) {
         localStorage.clear();
-        window.location.replace("/room/removed");
+        data.isSelf
+          ? window.location.replace("/room/exit/left")
+          : window.location.replace("/room/exit/removed");
         return;
       }
 

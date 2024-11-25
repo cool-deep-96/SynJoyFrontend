@@ -14,8 +14,13 @@ const showJoinRequestToast = (
         } max-w-xs  md:max-w-md w-full bg-gray-800 p-5 shadow-lg rounded-lg pointer-events-auto flex flex-col text-sm md:text-base`} // Dark background
       >
         <div className="flex justify-between items-center">
-          <p className="text-gray-100"> {/* Light text for dark theme */}
-            <span className="font-semibold text-green-500">{data.userName}</span> has requested to join the room.
+          <p className="text-gray-100">
+            {" "}
+            {/* Light text for dark theme */}
+            <span className="font-semibold text-green-500">
+              {data.userName}
+            </span>{" "}
+            has requested to join the room.
           </p>
           <button
             onClick={() => toast.dismiss(t.id)}
@@ -48,7 +53,7 @@ const showJoinRequestToast = (
     ),
     {
       position: "bottom-right",
-      duration: 60000, // 1 minute
+      duration: 30000, // 30sec
     }
   );
 };
