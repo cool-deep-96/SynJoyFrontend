@@ -9,7 +9,7 @@ const LiveChatHead = () => {
   const { tokenData } = useSocketUser()!;
 
   return (
-    <div className="px-2 select-none lg:py-5 py-2 font-medium flex items-center justify-between border-b">
+    <div className="px-2 select-none lg:py-5 py-2 font-medium flex items-center justify-between ">
       <div className="flex lg:gap-5 gap-3 ">
         <p className="opacity-80">Live chat</p>
         <MemberProvider>

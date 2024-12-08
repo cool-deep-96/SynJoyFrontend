@@ -59,10 +59,10 @@ interface VideoProviderProps {
 
 export const VideoProvider: React.FC<VideoProviderProps> = ({ children }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [source, setSource] = useState<Source>(Source.YOUTUBE);
+  const [source, setSource] = useState<Source>(Source.FILE);
   const [title, setTitle] = useState<string>("");
   const [url, setUrl] = useState<string>(
-    "https://youtu.be/llAYUWXV7CI?si=12S6muEs9rd3kxyY"
+    "/dev_file/Godzilla.mp4"
   );
   const [duration, setDuration] = useState<number>(0);
   const [currentTime, setCurrentTime] = useState<number>(0);

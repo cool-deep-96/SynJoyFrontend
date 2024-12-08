@@ -3,6 +3,8 @@ import LiveChat from "./LiveChat";
 import VideoPlayer from "./VideoPlayer/VideoPlayer";
 import { VideoProvider } from "./VideoPlayer/VideoPlayerContext";
 import { useSocketUser } from "../SocketContextProvider/SocketContext";
+import Info from "./Info";
+import LiveChatHead from "./LiveChatHead";
 
 export const Ui = () => {
   const [direction, setDirection] = useState<"vertical" | "horizontal">(
@@ -117,29 +119,44 @@ export const Ui = () => {
             flexBasis: `${100 - chatWidth}%`,
           }}
         >
-            <VideoPlayer />
+          <VideoPlayer />
         </div>
 
         {/* Resizable Handle */}
         <div
           onMouseDown={handleStartResize}
           onTouchStart={handleStartResize} // Start resizing on touch
-          className={`bg-gray-400 ${
+          className={`${
             direction === "horizontal"
-              ? "w-1 cursor-ew-resize"
-              : "h-1 cursor-ns-resize"
+              ? "w-2 bg-gray-800 cursor-ew-resize"
+              : "cursor-ns-resize"
           }`}
           style={{ flexShrink: 0 }}
-        />
+        >
+          <div
+            className={`${
+              direction === "horizontal"
+                ? "hidden"
+                : "border-gray-800 border-t border-b "
+            }`}
+          >
+            <Info />
+            <LiveChatHead />
+          </div>
+        </div>
 
         {/* Chat Panel */}
         <div
-          className="overflow-y-scroll"
+          className={`overflow-y-auto scrollable-div flex  h-full  flex-col  ${
+              direction === "horizontal"
+                ? "justify-between "
+                : ""
+          } `}
           style={{
             flexBasis: `${chatWidth}%`,
           }}
         >
-            <LiveChat />
+          <LiveChat direction={direction}/>
         </div>
       </div>
     </div>

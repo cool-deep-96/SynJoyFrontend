@@ -7,7 +7,7 @@ const VideoPlayer = () => {
   const { videoRef, url, source, player, isMuted, playerCreating } = useVideo();
 
   return (
-    <div className="relative flex justify-center items-center h-full w-full border border-red-300">
+    <div className="relative flex justify-center items-center h-full w-full">
       <div
         className={`h-full md:h-screen w-full flex items-center justify-center ${
           source === Source.YOUTUBE ? "" : "hidden"
