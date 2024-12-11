@@ -78,7 +78,7 @@ const SelfMessage = ({ message }: SelfMessageProps) => {
   return (
     <div className="select-none relative flex justify-self-end gap-2 w-fit my-2 max-w-[80%]">
       <div
-        className="relative bg-[#6A6767] lg:p-2 p-1 rounded-lg min-w-20 cursor-pointer"
+        className={`relative bg-[#6A6767] lg:p-2 p-1 rounded-lg min-w-20 cursor-pointer  border border-transparent ${isPopupVisible && 'border-white'}`}
         onClick={togglePopup}
       >
         {/* Display time and message */}
@@ -88,22 +88,22 @@ const SelfMessage = ({ message }: SelfMessageProps) => {
 
         {/* If editing, show input box for editing */}
         {isEditing ? (
-          <div className="flex ">
+          <div className="flex gap-2 ">
             <input
               type="text"
               value={editedMessage}
               onChange={(e) => setEditedMessage(e.target.value)}
-              className="text-black text-sm lg:text-base p-1 rounded"
+              className="text-white bg-[#6A6767] focus:outline-none  text-sm lg:text-base px-1 rounded"
             />
             <button
               onClick={handleUpdateMessage}
-              className="ml-2 text-white bg-blue-500 p-1 rounded"
+              className=" text-white bg-blue-500 p-1 rounded"
             >
               <CheckIcon />
             </button>
             <button
               onClick={() => setIsEditing(false)}
-              className="ml-2 text-white bg-red-500 p-1 rounded"
+              className=" text-white bg-red-500 p-1 rounded"
             >
               <Cross1Icon />
             </button>
@@ -116,7 +116,7 @@ const SelfMessage = ({ message }: SelfMessageProps) => {
       {/* Popup menu for Edit/Delete */}
       {isPopupVisible && !isEditing && (
         <div
-          className="absolute bottom-0 right-[100%] bg-black shadow-lg p-2 rounded-lg z-10"
+          className="absolute bottom-0 right-[100%] flex  shadow-lg p-2 rounded-lg z-10"
           onClick={(e) => e.stopPropagation()}
           ref={popupRef}
         >
