@@ -27,11 +27,10 @@ export interface Message {
 
 export interface ChatContextType {
   messages: Message[];
-  sendingMessages: Message[];
   setMessages: Dispatch<SetStateAction<Message[]>>;
-  sendMessage: (message: string) => void;
-  deleteMessage: (messageId: string) => void;
-  updateMessage: (messageId: string, text: string) => void;
+  sendMessage: (message: string) => Promise<void>;
+  deleteMessage: (messageId: string) => Promise<void>;
+  updateMessage: (messageId: string, text: string) => Promise<void>;
 }
 
 interface ChatProviderProps {
@@ -42,7 +41,6 @@ const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
 const ChatProvider = ({ children }: ChatProviderProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
-  const [sendingMessages, setSendingMessages] = useState<Message[]>([]);
   const { socket, tokenData, token } = useSocketUser()!;
 
   const headers = useMemo(
@@ -61,14 +59,16 @@ const ChatProvider = ({ children }: ChatProviderProps) => {
       const data = { roomId: tokenData.roomId };
 
       const response = await apiCall(method, url, data, headers);
-      setMessages(response.data);
+      setMessages(
+        response.data.map((dat: Message) => ({ ...dat, status: "SAVED" }))
+      );
     } catch (error) {
       toast.error((error as Error).message);
     }
   }, [headers, tokenData]);
 
   const sendMessage = useCallback(
-    async (message: string) => {
+    async (message: string): Promise<void> => {
       if (!message.trim()) return;
 
       try {
@@ -77,22 +77,20 @@ const ChatProvider = ({ children }: ChatProviderProps) => {
         const data = { message };
 
         const response = await apiCall(method, url, data, headers);
-        toast.success(response.message);
 
         const receivedMessage: Message = response.data;
-        setMessages(
-          (prev) =>
-            [
-              ...prev,
-              {
-                id: receivedMessage.id,
-                sentById: receivedMessage.sentById,
-                sentByUserName: receivedMessage.sentByUserName,
-                text: receivedMessage.text,
-                time: receivedMessage.time,
-                isRemoved: receivedMessage.isRemoved,
-              },
-            ].filter((v, i, a) => a.findIndex((t) => t.id === v.id) === i)
+        setMessages((prev) =>
+          [
+            ...prev,
+            {
+              id: receivedMessage.id,
+              sentById: receivedMessage.sentById,
+              sentByUserName: receivedMessage.sentByUserName,
+              text: receivedMessage.text,
+              time: receivedMessage.time,
+              isRemoved: receivedMessage.isRemoved,
+            },
+          ].filter((v, i, a) => a.findIndex((t) => t.id === v.id) === i)
         );
       } catch (error) {
         toast.error((error as Error).message);
@@ -102,7 +100,7 @@ const ChatProvider = ({ children }: ChatProviderProps) => {
   );
 
   const updateMessage = useCallback(
-    async (messageId: string, text: string) => {
+    async (messageId: string, text: string): Promise<void> => {
       if (!text.trim()) return;
 
       try {
@@ -111,7 +109,6 @@ const ChatProvider = ({ children }: ChatProviderProps) => {
         const data = { updatedMessage: text };
 
         const response = await apiCall(method, url, data, headers);
-        toast.success(response.message);
 
         setMessages((prev) =>
           prev.map((msg) =>
@@ -133,14 +130,12 @@ const ChatProvider = ({ children }: ChatProviderProps) => {
   );
 
   const deleteMessage = useCallback(
-    async (messageId: string) => {
+    async (messageId: string): Promise<void> => {
       try {
         const url = `${chatEndPoints.DELETE_CHAT}${messageId}`;
         const method = "DELETE";
 
-        const response = await apiCall(method, url, null, headers);
-        toast.success(response.message);
-
+        await apiCall(method, url, null, headers);
 
         setMessages((prev) => prev.filter((msg) => msg.id !== messageId));
       } catch (error) {
@@ -186,7 +181,6 @@ const ChatProvider = ({ children }: ChatProviderProps) => {
     <ChatContext.Provider
       value={{
         messages,
-        sendingMessages,
         deleteMessage,
         sendMessage,
         setMessages,

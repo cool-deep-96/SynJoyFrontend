@@ -35,12 +35,10 @@ const SelfMessage = ({ message }: SelfMessageProps) => {
 
   const popupRef = useRef<HTMLDivElement | null>(null);
 
-  // Toggle popup visibility
   const togglePopup = () => {
     setIsPopupVisible(!isPopupVisible);
   };
 
-  // Handle message update
   const handleUpdateMessage = () => {
     if (editedMessage.trim()) {
       updateMessage(message.id, editedMessage);
@@ -48,28 +46,23 @@ const SelfMessage = ({ message }: SelfMessageProps) => {
     }
   };
 
-  // Handle message delete
   const handleDeleteMessage = () => {
     deleteMessage(message.id);
   };
 
-  // Close the popup if clicked outside of it
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      // Check if the popup is visible and if the click is outside of it
       if (
         isPopupVisible &&
         popupRef.current &&
-        !popupRef.current.contains(event.target as Node) // Ensure target is checked against popup
+        !popupRef.current.contains(event.target as Node)
       ) {
         setIsPopupVisible(false);
       }
     };
 
-    // Attach the event listener to the document
     document.addEventListener("mousedown", handleClickOutside);
 
-    // Clean up the event listener on component unmount
     return () => {
       document.removeEventListener("mousedown", handleClickOutside);
     };

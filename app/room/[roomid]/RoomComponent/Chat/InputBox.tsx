@@ -12,6 +12,7 @@ const InputBox = () => {
   const [message, setMessage] = useState("");
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [emojiSuggestions, setEmojiSuggestions] = useState<string[]>([]);
+  const [loading, setLoading] = useState<boolean>(false);
   const inputRef = useRef<HTMLTextAreaElement>(null);
 
   const updateMessageWithEmoji = (emoji: string, caretPosition: number) => {
@@ -20,10 +21,8 @@ const InputBox = () => {
     const updatedMessage = `${beforeText}${emoji}${afterText}`;
     setMessage(updatedMessage);
 
-    // Keep caret position right after the inserted emoji
     const newCaretPosition = caretPosition + emoji.length;
 
-    // Update caret position
     inputRef.current?.setSelectionRange(newCaretPosition, newCaretPosition);
     inputRef.current?.focus();
   };
@@ -34,12 +33,14 @@ const InputBox = () => {
     setShowEmojiPicker(false);
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (message.trim()) {
-      sendMessage(message);
+      setLoading(true);
+      await sendMessage(message);
       setMessage("");
       setEmojiSuggestions([]);
+      setLoading(false);
     }
   };
 
@@ -103,7 +104,10 @@ const InputBox = () => {
         {/* Send Button */}
         <button
           type="submit"
-          className="absolute right-3 bottom-3 text-green-200 p-1 rounded-full"
+          className={`absolute right-3 bottom-3 p-1 rounded-full transition-transform ${
+            loading ? "animate-shimmer -rotate-45" : "hover:scale-110 hover:cursor-pointer"
+          }`}
+          disabled={loading}
         >
           <SendHorizontal />
         </button>

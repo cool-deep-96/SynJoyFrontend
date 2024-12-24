@@ -1,30 +1,25 @@
-
-.range input{
-
+.range input {
   --selected-region: 0%;
   -webkit-appearance: none;
   width: 100%;
   height: 3px;
-  background: #a89de6 ;
+  background: #a89de6;
   border-radius: 5px;
   outline: none;
   border: none;
   z-index: 0;
   position: relative;
-  
 }
 
-.range input::before{
+.range input::before {
   position: absolute;
   width: var(--selected-region);
   height: 5px;
-  content: '';
+  content: "";
   background-color: #190399;
   z-index: 1;
-  
-
 }
-.range input::-webkit-slider-thumb{
+.range input::-webkit-slider-thumb {
   -webkit-appearance: none;
   width: 20px;
   height: 20px;
@@ -33,35 +28,38 @@
   border: 5px solid #190399;
   cursor: pointer;
   z-index: 5;
-
 }
-.range input::-moz-range-thumb{
+.range input::-moz-range-thumb {
   -webkit-appearance: none;
   width: 20px;
   height: 20px;
 
   border-radius: 50%;
-  background: #664AFF;
-  border: 1px solid #664AFF;
+  background: #664aff;
+  border: 1px solid #664aff;
   cursor: pointer;
 }
-.range input::-moz-range-progress{
-  background: #664AFF; 
+.range input::-moz-range-progress {
+  background: #664aff;
 }
 
-.shimmer{
+.shimmer {
   opacity: 10%;
   animation-name: slidding;
   animation-duration: 2s;
   animation-iteration-count: infinite;
 }
 @keyframes slidding {
-  0% {left : -50%; }
-  100% {left: 100%;}
+  0% {
+    left: -50%;
+  }
+  100% {
+    left: 100%;
+  }
 }
 
 #youtubePlayer {
-  width: 100%;  /* Fill the width of the container */
+  width: 100%; /* Fill the width of the container */
   height: 100%; /* Fill the height of the container */
 }
 
@@ -69,23 +67,28 @@
 .loader {
   width: 40px;
   aspect-ratio: 1;
-   --c: linear-gradient(#860404 0 0);
-   --m: radial-gradient(farthest-side,#731f1f 92%,#ffffff00);
-  background: 
-    var(--c),var(--m),
-    var(--c),var(--m), 
-    var(--c),var(--m);
-  background-size: 8px 15px,8px 8px;
+  --c: linear-gradient(#860404 0 0);
+  --m: radial-gradient(farthest-side, #731f1f 92%, #ffffff00);
+  background: var(--c), var(--m), var(--c), var(--m), var(--c), var(--m);
+  background-size: 8px 15px, 8px 8px;
   background-repeat: no-repeat;
   animation: l14 1s infinite alternate;
 }
 @keyframes l14 {
   0%,
-  10% {background-position: 0 0   ,0 100%,50% 0   ,50% 100%,100% 0   ,100% 100%}
-  33% {background-position: 0 100%,0 0   ,50% 0   ,50% 100%,100% 0   ,100% 100%}
-  66% {background-position: 0 100%,0 0   ,50% 100%,50% 0   ,100% 0   ,100% 100%}
+  10% {
+    background-position: 0 0, 0 100%, 50% 0, 50% 100%, 100% 0, 100% 100%;
+  }
+  33% {
+    background-position: 0 100%, 0 0, 50% 0, 50% 100%, 100% 0, 100% 100%;
+  }
+  66% {
+    background-position: 0 100%, 0 0, 50% 100%, 50% 0, 100% 0, 100% 100%;
+  }
   90%,
-  100%{background-position: 0 100%,0 0   ,50% 100%,50% 0   ,100% 100%,100% 0   }
+  100% {
+    background-position: 0 100%, 0 0, 50% 100%, 50% 0, 100% 100%, 100% 0;
+  }
 }
 
 .pulse {
@@ -99,7 +102,7 @@
   width: 33.6px;
   height: 33.6px;
   border-radius: 50%;
-  content: '';
+  content: "";
   display: block;
 }
 
@@ -118,26 +121,27 @@
 
 @keyframes pulse-7ypmgi {
   0% {
-     transform: scale(0);
+    transform: scale(0);
   }
 
   50% {
-     transform: scale(1);
+    transform: scale(1);
   }
 }
 
 @keyframes pulse-6r5w34 {
-  0%, 50% {
-     opacity: 0;
+  0%,
+  50% {
+    opacity: 0;
   }
 
   55% {
-     opacity: 1;
+    opacity: 1;
   }
 
   100% {
-     opacity: 0;
-     transform: scale(2);
+    opacity: 0;
+    transform: scale(2);
   }
 }
 
@@ -159,4 +163,24 @@
 
 .scrollable-div::-webkit-scrollbar-thumb:hover {
   background-color: #888; /* Thumb color on hover */
+}
+
+@keyframes shimmer {
+  0% {
+    background-position: -200%;
+  }
+  100% {
+    background-position: 200%;
+  }
+}
+
+.animate-shimmer {
+  background: linear-gradient(
+    90deg,
+    rgba(0, 255, 0, 0.3) 25%,
+    rgba(0, 255, 0, 0.6) 50%,
+    rgba(0, 255, 0, 0.3) 75%
+  );
+  background-size: 200%;
+  animation: shimmer 1.5s infinite;
 }

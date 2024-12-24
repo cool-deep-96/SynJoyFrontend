@@ -17,7 +17,7 @@ const MembersList = () => {
       setOpenSection("joined");
     }
     if (openSection !== section) {
-      setOpenSection(section); // Only change the section if a different section is clicked
+      setOpenSection(section);
     }
   };
 

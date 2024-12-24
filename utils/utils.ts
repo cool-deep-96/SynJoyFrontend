@@ -1,4 +1,8 @@
-import { CreateRoomPayload, JoinChannelMessage, JoinRoomPayload } from "@/interfaces/interfaces";
+import {
+  CreateRoomPayload,
+  JoinChannelMessage,
+  JoinRoomPayload,
+} from "@/interfaces/interfaces";
 
 export const generateRoomId = (): string => {
   const characters =
@@ -45,10 +49,16 @@ export const formatAMPM = (dateString: string) => {
   const date = new Date(dateString);
   let hours = date.getHours();
   let minutes = date.getMinutes();
-  const ampm = hours >= 12 ? 'PM' : 'AM';
+  const ampm = hours >= 12 ? "PM" : "AM";
   hours = hours % 12;
-  hours = hours ? hours : 12; // If the hour is 0, set it to 12
-  minutes = minutes < 10 ? 0 + minutes : minutes; // Add leading zero if needed
-  const strTime = hours + ':' + minutes + ' ' + ampm;
+  hours = hours ? hours : 12;
+  const strTime =
+    `${hours < 10 ? "0" : ""}` +
+    hours +
+    ":" +
+    `${minutes < 10 ? "0" : ""}` +
+    minutes +
+    " " +
+    ampm;
   return strTime;
-}
+};

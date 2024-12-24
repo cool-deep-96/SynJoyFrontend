@@ -27,8 +27,8 @@ interface MemberContextType {
   requestedMembers: Member[];
   newRequests: Member[];
   setNewRequests: React.Dispatch<React.SetStateAction<Member[]>>;
-  acceptMember: (id: string, userName: string) => void;
-  removeMember: (id: string, userName: string) => void;
+  acceptMember: (id: string, userName: string) => Promise<void>;
+  removeMember: (id: string, userName: string) => Promise<void>;
 }
 
 const MemberContext = createContext<MemberContextType | undefined>(undefined);
@@ -46,8 +46,7 @@ const MemberProvider = ({ children }: { children: React.ReactNode }) => {
     [token]
   );
 
-  // Get all members (joined and requested)
-  const getAllMembers = useCallback(async () => {
+  const getAllMembers = useCallback(async (): Promise<void> => {
     if (!tokenData?.roomId) return;
     try {
       const { payload } = await apiCall(
@@ -65,7 +64,7 @@ const MemberProvider = ({ children }: { children: React.ReactNode }) => {
   }, [headers, tokenData?.roomId]);
 
   const acceptMember = useCallback(
-    async (id: string, userName: string) => {
+    async (id: string, userName: string): Promise<void> => {
       try {
         const { message } = await apiCall(
           "PUT",
@@ -75,7 +74,6 @@ const MemberProvider = ({ children }: { children: React.ReactNode }) => {
         );
         toast.success(message);
 
-        // Move the member from requested to joined
         setRequestedMembers((prev) =>
           prev.filter((member) => member.id !== id)
         );
@@ -102,7 +100,7 @@ const MemberProvider = ({ children }: { children: React.ReactNode }) => {
   );
 
   const removeMember = useCallback(
-    async (id: string, userName: string) => {
+    async (id: string, userName: string): Promise<void> => {
       try {
         const { message } = await apiCall(
           "PUT",
@@ -112,7 +110,6 @@ const MemberProvider = ({ children }: { children: React.ReactNode }) => {
         );
         toast.success(message);
 
-        // Remove from both joined and requested members
         setJoinedMembers((prev) => prev.filter((member) => member.id !== id));
         setRequestedMembers((prev) =>
           prev.filter((member) => member.id !== id)
@@ -124,12 +121,10 @@ const MemberProvider = ({ children }: { children: React.ReactNode }) => {
     [headers]
   );
 
-  // Handle syncing the joined member list via socket
   useEffect(() => {
     if (!socket) return;
 
     const handleSyncJoined = (data: Member) => {
-      // If the current user is removed
       if (data.id === tokenData?.id && !data.isMember) {
         localStorage.clear();
         data.isSelf
@@ -155,11 +150,9 @@ const MemberProvider = ({ children }: { children: React.ReactNode }) => {
     };
   }, [socket, tokenData]);
 
-  // Handle join requests via socket
   useEffect(() => {
     if (socket && tokenData?.isOwner) {
       const handleJoinRequest = (data: Member) => {
-        // Append to newRequests only if the member is not already in the list
         setNewRequests((prev) => {
           const isNewRequest = !prev.some((req) => req.id === data.id);
           if (isNewRequest) {
@@ -205,7 +198,6 @@ const MemberProvider = ({ children }: { children: React.ReactNode }) => {
 
 export default MemberProvider;
 
-// Hook to use the MemberContext
 export const useMember = (): MemberContextType => {
   const context = useContext(MemberContext);
   if (!context) {
