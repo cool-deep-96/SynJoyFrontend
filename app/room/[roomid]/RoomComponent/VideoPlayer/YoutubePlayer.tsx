@@ -17,7 +17,6 @@ const YoutubePlayer = () => {
   const [videoId, setVideoId] = useState<string>("");
   const currentTimeIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Helper to extract video ID from the URL
   const extractVideoId = (url: string) => {
     const regex =
       /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/|y\/|\/v\/|\/e\/|watch\?v=|&v=|watch\?.+&v=|&v=|\/vi?\/)([^"&?\/\s]{11})/;
@@ -25,7 +24,6 @@ const YoutubePlayer = () => {
     return match ? match[1] : null;
   };
 
-  // Handle URL changes and validate YouTube URL
   const handleYouTubeUrl = useCallback(
     (newUrl: string) => {
       const id = extractVideoId(newUrl);
@@ -39,9 +37,7 @@ const YoutubePlayer = () => {
     },
     [setUrl]
   );
-
-  // Updates the video duration using YouTube API
-  const updateDuration = useCallback(async () => {
+  const updateDuration = useCallback(async (): Promise<void> => {
     if (player.current) {
       const duration = await player.current.getDuration();
       if (duration) setDuration(duration);
@@ -50,15 +46,13 @@ const YoutubePlayer = () => {
     }
   }, [player, setDuration, setIsBuffering, setPlayerCreating]);
 
-  // Updates the current playback time
-  const updateCurrentTime = useCallback(async () => {
+  const updateCurrentTime = useCallback(async (): Promise<void> => {
     if (player.current) {
       const currentTime = await player.current.getCurrentTime();
       setCurrentTime(currentTime);
     }
   }, [player, setCurrentTime]);
 
-  // Start/Stop updating current time
   const startUpdatingCurrentTime = useCallback(() => {
     if (!currentTimeIntervalRef.current) {
       currentTimeIntervalRef.current = setInterval(updateCurrentTime, 1000);
@@ -72,7 +66,6 @@ const YoutubePlayer = () => {
     }
   }, []);
 
-  // Initialize the YouTube player
   const initializePlayer = useCallback(() => {
     if (videoId) {
       player.current = YouTubePlayer("youtubePlayer", {
@@ -116,14 +109,12 @@ const YoutubePlayer = () => {
     setIsBuffering,
   ]);
 
-  // Effect: Handle URL changes
   useEffect(() => {
     if (url) {
       handleYouTubeUrl(url);
     }
   }, [url, handleYouTubeUrl]);
 
-  // Effect: Initialize player when videoId changes
   useEffect(() => {
     setPlayerCreating(true);
     initializePlayer();

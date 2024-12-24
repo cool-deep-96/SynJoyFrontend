@@ -20,13 +20,11 @@ const ThreeDot = () => {
     };
 
     if (navigator.share) {
-      // Use Web Share API
       navigator
         .share(shareData)
         .then(() => console.log("Room link shared successfully!"))
         .catch((err) => console.error("Error sharing the room link:", err));
     } else {
-      // Fallback for browsers that do not support Web Share API
       alert(`Copy and share this link: ${roomLink}`);
     }
   };

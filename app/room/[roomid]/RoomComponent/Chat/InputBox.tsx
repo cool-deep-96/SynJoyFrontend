@@ -23,14 +23,17 @@ const InputBox = () => {
 
     const newCaretPosition = caretPosition + emoji.length;
 
-    inputRef.current?.setSelectionRange(newCaretPosition, newCaretPosition);
     inputRef.current?.focus();
+    inputRef.current?.setSelectionRange(newCaretPosition, newCaretPosition);
   };
 
   const handleEmojiSelect = (emoji: any) => {
-    const caretPosition = inputRef.current?.selectionStart || 0;
-    updateMessageWithEmoji(emoji.native, caretPosition);
-    setShowEmojiPicker(false);
+    if (inputRef.current) {
+      inputRef.current.focus();
+      const caretPosition = inputRef.current?.selectionStart || 0;
+      updateMessageWithEmoji(emoji.native, caretPosition);
+      setShowEmojiPicker(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -105,7 +108,9 @@ const InputBox = () => {
         <button
           type="submit"
           className={`absolute right-3 bottom-3 p-1 rounded-full transition-transform ${
-            loading ? "animate-shimmer -rotate-45" : "hover:scale-110 hover:cursor-pointer"
+            loading
+              ? "animate-shimmer -rotate-45"
+              : "hover:scale-110 hover:cursor-pointer"
           }`}
           disabled={loading}
         >

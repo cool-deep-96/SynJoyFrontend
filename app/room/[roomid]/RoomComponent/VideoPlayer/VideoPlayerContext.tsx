@@ -27,7 +27,7 @@ export interface SycVideoPayload {
 export interface VideoContextType {
   videoRef: RefObject<HTMLVideoElement>;
   source: Source;
-  url: string;
+  url: string | null;
   title: string;
   duration: number;
   currentTime: number;
@@ -38,7 +38,7 @@ export interface VideoContextType {
   playerCreating: boolean;
   player: MutableRefObject<YouTubePlayer | undefined>;
   setSource: Dispatch<SetStateAction<Source>>;
-  setUrl: Dispatch<SetStateAction<string>>;
+  setUrl: Dispatch<SetStateAction<string | null>>;
   setTitle: Dispatch<SetStateAction<string>>;
   setDuration: Dispatch<SetStateAction<number>>;
   setCurrentTime: Dispatch<SetStateAction<number>>;
@@ -59,11 +59,9 @@ interface VideoProviderProps {
 
 export const VideoProvider: React.FC<VideoProviderProps> = ({ children }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
-  const [source, setSource] = useState<Source>(Source.FILE);
+  const [source, setSource] = useState<Source>(Source.YOUTUBE);
   const [title, setTitle] = useState<string>("");
-  const [url, setUrl] = useState<string>(
-    "/dev_file/Godzilla.mp4"
-  );
+  const [url, setUrl] = useState<string | null>("https://youtu.be/bS-0X0Rw7f0?si=7w0mpUuDyD856Am7");
   const [duration, setDuration] = useState<number>(0);
   const [currentTime, setCurrentTime] = useState<number>(0);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
@@ -93,12 +91,10 @@ export const VideoProvider: React.FC<VideoProviderProps> = ({ children }) => {
         setCurrentTime(videoElement.currentTime);
       };
 
-      // Show loader when video is buffering (waiting)
       const handleWaiting = () => {
         setIsBuffering(true);
       };
 
-      // Hide loader and show "play" button when video is ready to play
       const handleCanPlay = () => {
         setIsBuffering(false);
       };

@@ -2,9 +2,12 @@ import { useVideo } from "./VideoPlayerContext";
 import Controller from "./Controller";
 import { Source } from "@/interfaces/interfaces";
 import YoutubePlayer from "./YoutubePlayer";
+import { BellDot, LucideMessageSquareText } from "lucide-react";
+import { useSocketUser } from "../../SocketContextProvider/SocketContext";
 
 const VideoPlayer = () => {
   const { videoRef, url, source, player, isMuted, playerCreating } = useVideo();
+  const { setOpenChat } = useSocketUser()!;
 
   return (
     <div className="relative flex justify-center items-center h-full w-full">
@@ -19,7 +22,7 @@ const VideoPlayer = () => {
           style={{ pointerEvents: "none" }}
         ></div>
       </div>
-      {source && source === Source.FILE ? (
+      {source && url && source === Source.FILE ? (
         <video
           ref={videoRef}
           preload="metadata"
@@ -30,12 +33,21 @@ const VideoPlayer = () => {
       ) : (
         <YoutubePlayer />
       )}
-
       {/* controls */}
       {!playerCreating && (videoRef.current || player.current) && (
         <Controller />
       )}
       {/* controls */}
+
+      <div
+        className="absolute bottom-0 z-3 right-0 my-4 px-5  md:flex cursor-pointer"
+        onClick={() => setOpenChat((prev) => !prev)}
+      >
+        <div className="relative">
+          <BellDot className="absolute left-[75%] w-3 p-[1px] h-3 bg-red-600 rounded-full " />
+          <LucideMessageSquareText className="text-green-300  md:w-8 h-auto" />
+        </div>
+      </div>
     </div>
   );
 };

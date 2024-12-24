@@ -3,11 +3,11 @@ import ChatBox from "./Chat/ChatBox";
 import LiveChatHead from "./LiveChatHead";
 import Info from "./Info";
 
-interface Props{
-  direction: 'horizontal' | 'vertical'
+interface Props {
+  direction: "horizontal" | "vertical";
 }
 
-const LiveChat = ({direction}: Props) => {
+const LiveChat = ({ direction }: Props) => {
   return (
     <div className="flex flex-col h-full justify-between text-sm lg:text-base max-h-full">
       <div

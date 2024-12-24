@@ -13,7 +13,7 @@ export default function Room() {
     <section className="">
       {/* Conditionally render the Waiting component based on the user's approval status */}
       {!tokenData?.isMember ? (
-        <Waiting /> // Render the Waiting component if the user is not approved
+        <Waiting />
       ) : (
         <VideoProvider>
           <ChatProvider>

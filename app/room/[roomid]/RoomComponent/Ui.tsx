@@ -15,17 +15,15 @@ export const Ui = () => {
   const [isResizing, setIsResizing] = useState(false);
   const resizableRef = useRef<HTMLDivElement | null>(null);
 
-  // Detect screen size and update direction
   const handleResize = () => {
     if (window.innerWidth <= 768) {
-      setDirection("vertical"); // Mobile view: Vertical split
+      setDirection("vertical");
     } else {
-      setDirection("horizontal"); // Desktop view: Horizontal split
+      setDirection("horizontal");
     }
   };
 
   useEffect(() => {
-    // Set initial direction based on screen size
     handleResize();
     window.addEventListener("resize", handleResize);
     return () => {
@@ -42,19 +40,16 @@ export const Ui = () => {
     }
   }, [openChat, direction]);
 
-  // Start resizing for both mouse and touch
   const handleStartResize = (e: any) => {
     setIsResizing(true);
   };
 
-  // Handle resizing movement for both mouse and touch
   const handleResizeMove = useCallback(
     (e: any) => {
       if (!isResizing || !resizableRef.current) return;
       const resizableRect = resizableRef.current.getBoundingClientRect();
       let clientX: number, clientY: number;
 
-      // Extract touch or mouse positions
       if (e instanceof MouseEvent) {
         clientX = e.clientX;
         clientY = e.clientY;
@@ -64,31 +59,28 @@ export const Ui = () => {
       }
 
       if (direction === "horizontal") {
-        // Horizontal resizing (adjust width)
+
         const newChatWidth =
           ((resizableRect.right - clientX) / window.innerWidth) * 100;
         setChatWidth(
           newChatWidth > 5 ? (newChatWidth < 95 ? newChatWidth : 95) : 5
-        ); // Limit to 5% - 95%
+        );
       } else {
-        // Vertical resizing (adjust height)
         const newChatHeight =
           ((resizableRect.bottom - clientY) / window.innerHeight) * 100;
         setChatWidth(
           newChatHeight > 5 ? (newChatHeight < 95 ? newChatHeight : 95) : 5
-        ); // Limit to 5% - 95%
+        );
       }
     },
     [direction, isResizing]
   );
 
-  // Stop resizing for both mouse and touch
   const handleEndResize = () => {
     setIsResizing(false);
   };
 
   useEffect(() => {
-    // Add event listeners for mouse and touch events
     window.addEventListener("mousemove", handleResizeMove);
     window.addEventListener("mouseup", handleEndResize);
     window.addEventListener("touchmove", handleResizeMove);
@@ -125,7 +117,7 @@ export const Ui = () => {
         {/* Resizable Handle */}
         <div
           onMouseDown={handleStartResize}
-          onTouchStart={handleStartResize} // Start resizing on touch
+          onTouchStart={handleStartResize}
           className={`${
             direction === "horizontal"
               ? "w-2 bg-gray-800 cursor-ew-resize"
