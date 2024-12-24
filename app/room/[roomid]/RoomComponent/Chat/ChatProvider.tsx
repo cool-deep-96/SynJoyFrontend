@@ -38,16 +38,13 @@ interface ChatProviderProps {
   children: ReactNode;
 }
 
-// Create Context
 const ChatContext = createContext<ChatContextType | undefined>(undefined);
 
-// ChatProvider component
 const ChatProvider = ({ children }: ChatProviderProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [sendingMessages, setSendingMessages] = useState<Message[]>([]);
   const { socket, tokenData, token } = useSocketUser()!;
 
-  // Memoize headers to avoid unnecessary recalculations
   const headers = useMemo(
     () => ({
       Authorization: `Bearer ${token}`,
@@ -55,7 +52,6 @@ const ChatProvider = ({ children }: ChatProviderProps) => {
     [token]
   );
 
-  // Fetch all chats by room ID
   const getAllChatsByRoomId = useCallback(async () => {
     if (!tokenData?.roomId) return;
 
@@ -71,10 +67,9 @@ const ChatProvider = ({ children }: ChatProviderProps) => {
     }
   }, [headers, tokenData]);
 
-  // Send new message
   const sendMessage = useCallback(
     async (message: string) => {
-      if (!message.trim()) return; // Prevent empty messages
+      if (!message.trim()) return;
 
       try {
         const url = chatEndPoints.CREATE_CHAT;
@@ -97,7 +92,7 @@ const ChatProvider = ({ children }: ChatProviderProps) => {
                 time: receivedMessage.time,
                 isRemoved: receivedMessage.isRemoved,
               },
-            ].filter((v, i, a) => a.findIndex((t) => t.id === v.id) === i) // Ensure no duplicates
+            ].filter((v, i, a) => a.findIndex((t) => t.id === v.id) === i)
         );
       } catch (error) {
         toast.error((error as Error).message);
@@ -106,13 +101,12 @@ const ChatProvider = ({ children }: ChatProviderProps) => {
     [headers]
   );
 
-  // Update message
   const updateMessage = useCallback(
     async (messageId: string, text: string) => {
-      if (!text.trim()) return; // Prevent empty updates
+      if (!text.trim()) return;
 
       try {
-        const url = `${chatEndPoints.UPDATE_CHAT}${messageId}`; // Changed the endpoint
+        const url = `${chatEndPoints.UPDATE_CHAT}${messageId}`;
         const method = "PATCH";
         const data = { updatedMessage: text };
 
@@ -138,7 +132,6 @@ const ChatProvider = ({ children }: ChatProviderProps) => {
     [headers]
   );
 
-  // Delete message
   const deleteMessage = useCallback(
     async (messageId: string) => {
       try {
@@ -148,7 +141,7 @@ const ChatProvider = ({ children }: ChatProviderProps) => {
         const response = await apiCall(method, url, null, headers);
         toast.success(response.message);
 
-        // Remove the message from state
+
         setMessages((prev) => prev.filter((msg) => msg.id !== messageId));
       } catch (error) {
         toast.error((error as Error).message);
@@ -157,7 +150,6 @@ const ChatProvider = ({ children }: ChatProviderProps) => {
     [headers]
   );
 
-  // Socket handling for real-time message sync
   useEffect(() => {
     if (!socket) return;
 
@@ -165,18 +157,15 @@ const ChatProvider = ({ children }: ChatProviderProps) => {
       console.log(data);
       setMessages((prev) => {
         if (data.isRemoved) {
-          // If the message is marked as removed, filter it out from the list
           return prev.filter((msg) => msg.id !== data.id);
         }
         const existingIndex = prev.findIndex((msg) => msg.id === data.id);
 
         if (existingIndex !== -1) {
-          // If the message exists, update it by replacing the old one
           const updatedMessages = [...prev];
-          updatedMessages[existingIndex] = data; // Replace the old message with the new one
+          updatedMessages[existingIndex] = data;
           return updatedMessages;
         } else {
-          // If it's a new message, add it while maintaining the order
           return [...prev, data];
         }
       });
@@ -189,12 +178,10 @@ const ChatProvider = ({ children }: ChatProviderProps) => {
     };
   }, [socket]);
 
-  // Fetch all chats on component mount
   useEffect(() => {
     getAllChatsByRoomId();
   }, [getAllChatsByRoomId]);
 
-  // Provide chat context
   return (
     <ChatContext.Provider
       value={{
