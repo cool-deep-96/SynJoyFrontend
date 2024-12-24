@@ -1,44 +1,140 @@
 import { SendHorizontal, Smile } from "lucide-react";
-import React, { useState } from "react";
+import React, { useRef, useState } from "react";
+import data from "@emoji-mart/data";
+import Picker from "@emoji-mart/react";
 import { useChat } from "./ChatProvider";
+import { init, SearchIndex } from "emoji-mart";
+
+init({ data });
 
 const InputBox = () => {
-  const { sendMessage } = useChat(); // Assuming sendMessage is a function to send the chat message
-  const [message, setMessage] = useState<string>(""); // State to hold the input value
+  const { sendMessage } = useChat();
+  const [message, setMessage] = useState("");
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+  const [emojiSuggestions, setEmojiSuggestions] = useState<string[]>([]);
+  const inputRef = useRef<HTMLTextAreaElement>(null);
 
-  // Handle form submission
+  const updateMessageWithEmoji = (emoji: string, caretPosition: number) => {
+    const beforeText = message.slice(0, caretPosition);
+    const afterText = message.slice(caretPosition);
+    const updatedMessage = `${beforeText}${emoji}${afterText}`;
+    setMessage(updatedMessage);
+
+    // Keep caret position right after the inserted emoji
+    const newCaretPosition = caretPosition + emoji.length;
+
+    // Update caret position
+    inputRef.current?.setSelectionRange(newCaretPosition, newCaretPosition);
+    inputRef.current?.focus();
+  };
+
+  const handleEmojiSelect = (emoji: any) => {
+    const caretPosition = inputRef.current?.selectionStart || 0;
+    updateMessageWithEmoji(emoji.native, caretPosition);
+    setShowEmojiPicker(false);
+  };
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
     if (message.trim()) {
-      sendMessage(message); // Call sendMessage with the current input value
-      setMessage(""); // Clear input after sending message
+      sendMessage(message);
+      setMessage("");
+      setEmojiSuggestions([]);
+    }
+  };
+
+  const handleChange = async (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const value = e.target.value;
+    setMessage(value);
+
+    const caretPosition = e.target.selectionStart || 0;
+    const match = value.slice(0, caretPosition).match(/:\w*$/);
+    if (match) {
+      const query = match[0].slice(1);
+      if (query) {
+        const emojis = await SearchIndex.search(query);
+        setEmojiSuggestions(
+          emojis.map((emoji: typeof emojis) => emoji?.skins[0].native)
+        );
+      }
+    } else {
+      setEmojiSuggestions([]);
+    }
+  };
+
+  const handleSuggestionClick = (emoji: string) => {
+    const caretPosition = inputRef.current?.selectionStart || 0;
+    const match = message.slice(0, caretPosition).match(/:\w*$/);
+
+    if (match) {
+      const startIndex = match.index || 0;
+      const beforeText = message.slice(0, startIndex);
+      const afterText = message.slice(caretPosition);
+      const updatedMessage = `${beforeText}${emoji}${afterText}`;
+      setMessage(updatedMessage);
+
+      const newCaretPosition = beforeText.length + emoji.length;
+      inputRef.current?.setSelectionRange(newCaretPosition, newCaretPosition);
+      setEmojiSuggestions([]);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="w-full relative">
-      {/* Left Icon */}
-      <div className="absolute h-full w-auto items-center flex flex-col justify-center">
-        <Smile color="yellow" className="mx-3" />
-      </div>
+    <div className="relative">
+      <form onSubmit={handleSubmit} className="w-full">
+        {/* Emoji Picker Toggle */}
+        <div
+          className="absolute left-3 bottom-3  cursor-pointer"
+          onClick={() => setShowEmojiPicker((prev) => !prev)}
+        >
+          <Smile color="yellow" />
+        </div>
 
-      {/* Right Icon (Send button) */}
-      <div className="absolute right-0 h-full w-auto items-center flex flex-col justify-center">
-        <button type="submit" className="mx-3 p-1 text-green-200 rounded-full">
-          <SendHorizontal  />
+        {/* Input Field */}
+        <textarea
+          ref={inputRef}
+          value={message}
+          onChange={handleChange}
+          placeholder="Type your message here..."
+          className="w-full text-sm md:text-base bg-gray-600 text-gray-100 py-3 pl-10 pr-14 rounded-lg resize-none focus:outline-none focus:border-green-300 scrollable-div"
+          rows={2}
+        />
+
+        {/* Send Button */}
+        <button
+          type="submit"
+          className="absolute right-3 bottom-3 text-green-200 p-1 rounded-full"
+        >
+          <SendHorizontal />
         </button>
-      </div>
+      </form>
 
-      {/* Input Field */}
-      <input
-        type="text"
-        value={message}
-        onChange={(e) => setMessage(e.target.value)} // Update message state on input change
-        placeholder="Type your message here..."
-        className="w-full text-sm md:text-base bg-gray-600 text-gray-100 mb-1 py-3  border border-transparent px-12 rounded-lg focus:outline-none focus:border-green-300"
-      />
-    </form>
+      {/* Emoji Picker */}
+      {showEmojiPicker && (
+        <div className="absolute left-0 bottom-[100%] z-10">
+          <Picker
+            data={data}
+            onEmojiSelect={handleEmojiSelect}
+            onClickOutside={() => setShowEmojiPicker(false)}
+          />
+        </div>
+      )}
+
+      {/* Emoji Suggestions */}
+      {emojiSuggestions.length > 0 && (
+        <div className="absolute flex left-0 bottom-[100%] z-20 bg-gray-700 text-white rounded-lg p-2 shadow-lg w-full overflow-hidden">
+          {emojiSuggestions.map((emoji, index) => (
+            <button
+              key={index}
+              onClick={() => handleSuggestionClick(emoji)}
+              className="block text-left px-3 py-1 hover:bg-gray-600 rounded"
+            >
+              {emoji}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
   );
 };
 
