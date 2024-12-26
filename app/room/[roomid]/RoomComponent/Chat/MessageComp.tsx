@@ -12,8 +12,8 @@ const MessageComp = ({ message }: MessageProps) => {
   return (
     <div className={`flex  gap-2 w-fit my-2 max-w-[80%] select-none`}>
       <CircleUserRound className="w-4 h-6 lg:w-6 lg:h-6" />
-      <div className="relative bg-[#6A6767] lg:p-2 p-1 rounded-lg ">
-        <p className="absolute lg:text-xs text-[0.60rem] font-medium right-1 bottom-1 lg:right-2 lg:bottom-2 opacity-60">
+      <div className="relative bg-[#6A6767] lg:p-2 p-1 rounded-lg min-w-20">
+        <p className="absolute lg:text-xs text-[0.60rem] font-medium right-1 bottom-1 lg:right-2 lg:bottom-2 opacity-60 whitespace-nowrap">
           {formatAMPM(message.time)}
         </p>
         <p className="text-[#FA5F05] text-sm">{message.sentByUserName}</p>
@@ -69,13 +69,13 @@ const SelfMessage = ({ message }: SelfMessageProps) => {
   }, [isPopupVisible]);
 
   return (
-    <div className="select-none relative flex justify-self-end gap-2 w-fit my-2 max-w-[80%]">
+    <div className="select-none relative flex justify-self-end gap-2 w-fit my-2 max-w-[80%] min-w-20">
       <div
         className={`relative bg-[#6A6767] lg:p-2 p-1 rounded-lg min-w-20 cursor-pointer  border border-transparent ${isPopupVisible && 'border-white'}`}
         onClick={togglePopup}
       >
         {/* Display time and message */}
-        <p className="absolute text-xs font-light right-1 bottom-1 lg:right-2 lg:bottom-2 opacity-60">
+        <p className="absolute text-xs font-light right-1 bottom-1 lg:right-2 lg:bottom-2 opacity-60 whitespace-nowrap">
           {formatAMPM(message.time)}
         </p>
 

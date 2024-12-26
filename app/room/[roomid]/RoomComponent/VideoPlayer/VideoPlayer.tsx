@@ -1,16 +1,55 @@
+"use client";
 import { useVideo } from "./VideoPlayerContext";
 import Controller from "./Controller";
 import { Source } from "@/interfaces/interfaces";
 import YoutubePlayer from "./YoutubePlayer";
 import { BellDot, LucideMessageSquareText } from "lucide-react";
 import { useSocketUser } from "../../SocketContextProvider/SocketContext";
+import { useEffect, useRef, useState } from "react";
 
 const VideoPlayer = () => {
   const { videoRef, url, source, player, isMuted, playerCreating } = useVideo();
   const { setOpenChat } = useSocketUser()!;
+  const [showController, setShowController] = useState<boolean>(true);
+
+  const timer = useRef<NodeJS.Timeout | null>(null);
+  const playerContainerRef = useRef<HTMLDivElement>(null);
+
+  // Function to reset timer and show the controller
+  const resetTimer = () => {
+    setShowController(true);
+    if (timer.current) clearTimeout(timer.current);
+
+    timer.current = setTimeout(() => {
+      setShowController(false);
+    }, 2000);
+  };
+
+  useEffect(() => {
+    const handleMouseMove = () => resetTimer();
+    const handleTouchStart = () => resetTimer();
+
+    const container = playerContainerRef.current;
+    if (container) {
+      container.addEventListener("mousemove", handleMouseMove);
+      container.addEventListener("touchstart", handleTouchStart);
+    }
+
+    // Clean up
+    return () => {
+      if (container) {
+        container.removeEventListener("mousemove", handleMouseMove);
+        container.removeEventListener("touchstart", handleTouchStart);
+      }
+      if (timer.current) clearTimeout(timer.current);
+    };
+  }, []);
 
   return (
-    <div className="relative flex justify-center items-center h-full w-full">
+    <div
+      ref={playerContainerRef}
+      className="relative flex justify-center items-center h-full w-full"
+    >
       <div
         className={`h-full md:h-screen w-full flex items-center justify-center ${
           source === Source.YOUTUBE ? "" : "hidden"
@@ -34,9 +73,9 @@ const VideoPlayer = () => {
         <YoutubePlayer />
       )}
       {/* controls */}
-      {!playerCreating && (videoRef.current || player.current) && (
-        <Controller />
-      )}
+      {showController &&
+        !playerCreating &&
+        (videoRef.current || player.current) && <Controller />}
       {/* controls */}
 
       <div
