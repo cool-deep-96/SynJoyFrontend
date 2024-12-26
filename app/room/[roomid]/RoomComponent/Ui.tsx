@@ -139,7 +139,7 @@ export const Ui = () => {
 
         {/* Chat Panel */}
         <div
-          className={`overflow-y-auto scrollable-div flex  h-full  flex-col  ${
+          className={`overflow-y-auto scrollable-div flex  h-full overflow-hidden  flex-col  ${
               direction === "horizontal"
                 ? "justify-between "
                 : ""
