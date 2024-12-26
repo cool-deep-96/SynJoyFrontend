@@ -67,10 +67,10 @@ const Controller = () => {
     }
   }, [isPlaying, videoRef, player]);
 
-  const handlePlayPause = () => {
+  const handlePlayPause = (is: boolean) => {
     const payload: SycVideoPayload = {
       currentTime,
-      isPlaying: !isPlaying,
+      isPlaying: is,
       source,
       tokenData,
       url,
@@ -92,9 +92,9 @@ const Controller = () => {
           {isBuffering ? (
             <VideoLoader />
           ) : isPlaying ? (
-            <Pause className=" hover:cursor-pointer " onClick={handlePlayPause} />
+            <Pause className=" hover:cursor-pointer " onClick={()=>handlePlayPause(false)} />
           ) : (
-            <Play className=" hover:cursor-pointer " onClick={handlePlayPause} />
+            <Play className=" hover:cursor-pointer " onClick={()=>handlePlayPause(true)} />
           )}
         </div>
 
